@@ -29,9 +29,16 @@ npm run build
 ```
 
 ### Bootstrap
-npm install bootstrap
 
-### main.js Add
-eğer yoksa ekleyin
+```sh
+npm install bootstrap
+```
+
+
+### main.js Add eğer yoksa
+
+```sh
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
+```
+
