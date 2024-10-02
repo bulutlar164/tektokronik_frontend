@@ -27,3 +27,11 @@ npm run dev
 ```sh
 npm run build
 ```
+
+### Bootstrap
+npm install bootstrap
+
+### main.js Add
+eğer yoksa ekleyin
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap/dist/js/bootstrap.bundle.js'
