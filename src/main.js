@@ -14,8 +14,8 @@ import Login from './views/Login.vue';
 
 const routes = [
     {path:"/",component:RouterTest},
-    {path:"/Admin",component:RouterTest2}
     {path:"/Admin",component:RouterTest2},
+    {path:"/Login",component:Login}
 ]
 
 const router = createRouter({
