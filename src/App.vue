@@ -1,5 +1,5 @@
 <script setup>
-
+import CustomLabelVue from "./components/CustomLabel.vue";
 </script>
 
 <template>
