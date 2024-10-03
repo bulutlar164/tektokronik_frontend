@@ -10,10 +10,12 @@ import { createRouter,createWebHistory} from 'vue-router'
 
 import RouterTest from './views/RouterTest.vue';
 import RouterTest2 from './views/RouterTest2.vue';
+import Login from './views/Login.vue';
 
 const routes = [
     {path:"/",component:RouterTest},
     {path:"/Admin",component:RouterTest2}
+    {path:"/Admin",component:RouterTest2},
 ]
 
 const router = createRouter({
