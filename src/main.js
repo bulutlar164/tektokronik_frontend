@@ -12,12 +12,14 @@ import RouterTest from './views/RouterTest.vue';
 import RouterTest2 from './views/RouterTest2.vue';
 import Login from './views/Login.vue';
 // Şevket Admin
+// Ati Takım
 
 const routes = [
     {path:"/",component:RouterTest},
     {path:"/Admin",component:RouterTest2},
     {path:"/Login",component:Login}
     //Sevket Admin
+    //Ati Takım
 ]
 
 const router = createRouter({

@@ -5,7 +5,7 @@ import CustomLabelVue from "../components/CustomLabel.vue";
 <template>
     <div>
         <h1>RouterTest</h1>
-        <CustomLabelVue></CustomLabelVue>
+      
     </div>
 </template>
 
