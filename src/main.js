@@ -1,30 +1,24 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
 
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.bundle.js';
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap/dist/js/bootstrap.bundle.js'
-
-
-import { createRouter,createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
 import RouterTest from './views/RouterTest.vue';
-import RouterTest2 from './views/RouterTest2.vue';
-import Login from './views/Login.vue';
-// Şevket Admin
-// Ati Takım
+import Admin from "@/views/Admin.vue";
 
 const routes = [
     {path:"/",component:RouterTest},
-    {path:"/Admin",component:RouterTest2},
-    {path:"/Login",component:Login}
-    //Sevket Admin
-    //Ati Takım
+    {path:"/Admin",component:Admin}
 ]
 
+// Create the router instance
 const router = createRouter({
-        history:createWebHistory(),
-        routes:routes
+  history: createWebHistory(),
+  routes: routes
 });
 
-createApp(App).use(router).mount('#app')
+// Create and mount the Vue app with the router
+createApp(App).use(router).mount('#app');
