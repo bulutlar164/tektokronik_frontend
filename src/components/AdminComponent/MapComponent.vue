@@ -11,12 +11,12 @@ export default {
   data() {
     return {
       markersData: [
-        { color: 'red', coords: [39.9334, 32.8597], info: 'Kırmızı Bina Bilgisi' },
-        { color: 'yellow', coords: [39.9345, 32.8605], info: 'Sarı Bina Bilgisi' },
-        { color: 'green', coords: [39.9355, 32.8615], info: 'Yeşil Bina Bilgisi' },
-        { color: 'blue', coords: [39.9325, 32.8585], info: 'Mavi Bina Bilgisi' },
-        { color: 'red', coords: [39.9315, 32.8575], info: 'Kırmızı Bina Bilgisi' },
-        { color: 'yellow', coords: [39.9365, 32.8625], info: 'Sarı Bina Bilgisi' }
+        { color: 'red', coords: [39.9334, 32.8597], info: 'Kırmızı Bina Bilgisi', isNew: true },
+        { color: 'yellow', coords: [39.9345, 32.8605], info: 'Sarı Bina Bilgisi', isNew: false },
+        { color: 'green', coords: [39.9355, 32.8615], info: 'Yeşil Bina Bilgisi', isNew: true },
+        { color: 'blue', coords: [39.9325, 32.8585], info: 'Mavi Bina Bilgisi', isNew: false },
+        { color: 'red', coords: [39.9315, 32.8575], info: 'Kırmızı Bina Bilgisi', isNew: false },
+        { color: 'yellow', coords: [39.9365, 32.8625], info: 'Sarı Bina Bilgisi', isNew: true }
       ],
       buildingImages: [
         'https://picsum.photos/150/150?random=1',
@@ -41,15 +41,32 @@ export default {
       }).addTo(map);
 
       this.markersData.forEach((data) => {
-        const markerIcon = L.divIcon({
-          className: `animated-marker ${data.color}`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-        });
+        // Nokta markerı ekle
+        const circleMarker = L.circleMarker(data.coords, {
+          radius: 6,  // Noktaların boyutu
+          color: data.color,
+          fillColor: data.color,
+          fillOpacity: 1,
+          className: 'custom-marker pulse-animation'  // Animasyon sınıfı tüm markerlara eklendi
+        }).addTo(map);
 
-        const marker = L.marker(data.coords, { icon: markerIcon }).addTo(map);
+        // "NEW" etiketi ekle (statik)
+        if (data.isNew) {
+          const newLabel = L.divIcon({
+            className: 'new-label',
+            html: `
+              <div class="new-label-wrapper">
+                <span class="new-label-text">NEW</span>
+                <div class="pin"></div>
+              </div>`,
+            iconSize: [50, 50],
+            iconAnchor: [25, 50]
+          });
+          L.marker(data.coords, { icon: newLabel }).addTo(map);
+        }
 
-        marker.bindPopup(`
+        // Popup ile bina bilgilerini gösterme
+        circleMarker.bindPopup(`
           <b>${data.info}</b><br>
           Adres: Ankara, Türkiye<br>
           Yükseklik: ${Math.floor(Math.random() * 50) + 10}m<br>
@@ -57,8 +74,8 @@ export default {
           <img src="${this.getRandomBuildingImage()}" alt="Bina Resmi" style="width:150px;height:150px;"/>
         `);
 
-        marker.on('click', () => {
-          marker.openPopup();
+        circleMarker.on('click', () => {
+          circleMarker.openPopup();
         });
       });
     }
@@ -69,7 +86,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 #map {
   height: 100%;
   width: 100%;
@@ -82,55 +99,69 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.animated-marker) {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.8);
+/* Nokta markerlar için stil */
+.custom-marker {
   position: relative;
 }
 
-:deep(.animated-marker::before) {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: inherit;
-  animation: pulse 1.5s infinite ease-out;
-  transform: translate(-50%, -50%);
+/* Animasyonlu pulse efekt */
+.pulse-animation {
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
+    stroke-opacity: 0.9;
+    stroke-width: 13;
+    r: 6;
+  }
+  30% {
+    stroke-opacity: 0.6;
+    stroke-width: 15;
+    r: 8;
   }
   50% {
-    transform: translate(-50%, -50%) scale(2);
-    opacity: 0.7;
+    stroke-opacity: 0.3;
+    stroke-width: 20;
+    r: 9;
+  }
+  70% {
+    stroke-opacity: 0.1;
+    stroke-width: 23;
+    r: 10;
   }
   100% {
-    transform: translate(-50%, -50%) scale(3);
-    opacity: 0;
+    stroke-opacity: 0;
+    stroke-width: 25;
+    r: 10;
   }
 }
 
-:deep(.animated-marker.red) {
-  background-color: rgba(255, 0, 0, 0.9);
+/* "NEW" etiketi ve pin */
+.new-label-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  /* Animasyon kaldırıldı */
 }
 
-:deep(.animated-marker.yellow) {
-  background-color: rgba(255, 215, 0, 0.9);
+.new-label-text {
+  background-color: #FF4081;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  margin-bottom: 4px;
 }
 
-:deep(.animated-marker.green) {
-  background-color: rgba(0, 255, 0, 0.9);
-}
-
-:deep(.animated-marker.blue) {
-  background-color: rgba(0, 0, 255, 0.9);
+.pin {
+  width: 2px;
+  height: 20px;
+  background-color: #FF4081;
+  margin-top: -5px;
+  border-radius: 2px;
 }
 </style>
