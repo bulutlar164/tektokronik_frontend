@@ -16,14 +16,26 @@
         <TeamsList />
       </div>
     </div>
+
+    <!-- Information Boxes with Functional Buttons -->
+    <div class="boxes row mt-4">
+      <DamageReportsBox />
+      <CrowdDetectionsBox />
+      <ResourcesBox />
+      <EquipmentBox />
+    </div>
   </div>
 </template>
 
 <script>
-import Navbar from "@/components/AdminComponent/Navbar.vue";
+import Navbar from "@/components/Navbar.vue";
 import MapComponent from "@/components/AdminComponent/MapComponent.vue";
 import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
 import TeamsList from "@/components/AdminComponent/TeamsList.vue";
+import DamageReportsBox from "@/components/AdminComponent/DamageReportsBox.vue";
+import CrowdDetectionsBox from "@/components/AdminComponent/CrowdDetectionsBox.vue";
+import ResourcesBox from "@/components/AdminComponent/ResourcesBox.vue";
+import EquipmentBox from "@/components/AdminComponent/EquipmentBox.vue";
 
 export default {
   name: "Admin",
@@ -31,42 +43,63 @@ export default {
     Navbar,
     MapComponent,
     IncidentsList,
-    TeamsList
+    TeamsList,
+    DamageReportsBox,
+    CrowdDetectionsBox,
+    ResourcesBox,
+    EquipmentBox
   }
 };
 </script>
 
 <style scoped>
 .admin-dashboard {
-  background-color: #faf8f5; /* Muted beige background color */
+  background-color: #faf8f9; /* Muted beige background color */
   min-height: 100vh;
 }
 
 .content-container {
   display: flex;
   width: 100%;
-  padding: 20px; /* Adjust for spacing */
+  padding: 20px 20px 0px 20px;
   margin: 0 auto;
 }
 
+.boxes{
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 .map-column {
-  height: auto;
+  height: 68vh;
   flex-grow: 1;
   display: flex;
   align-items: stretch;
-  padding-right: 10px; /* Spacing between columns */
+  padding-right: 10px;
 }
 
 .dashboard-column {
   height: 100%;
   flex-basis: 30%;
-  padding-left: 10px; /* Spacing between columns */
+  padding-left: 10px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.col-lg-6 {
+  width: 50%;
 }
 
 @media (max-width: 768px) {
   .content-container {
     flex-direction: column;
   }
+
   .map-column {
     height: 400px; /* Fixed height for smaller screens */
   }

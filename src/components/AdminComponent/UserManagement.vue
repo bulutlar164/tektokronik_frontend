@@ -1,18 +1,20 @@
 <template>
-  <div>
-    <h2 class="section-title">User Management</h2>
-    <div class="row">
-      <div v-for="user in users" :key="user.user_id" class="col-md-12 mb-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">{{ user.username }}</h5>
-            <p class="card-text">
-              <strong>Email:</strong> {{ user.email }}<br>
-              <strong>Role:</strong> {{ user.role }}
-            </p>
-            <button @click="editUser(user)" class="btn btn-primary btn-sm">Edit</button>
-            <button @click="deleteUser(user.user_id)" class="btn btn-danger btn-sm">Delete</button>
-          </div>
+  <div class="admin-dashboard">
+    <!-- Navbar -->
+    <Navbar />
+
+    <!-- Main Content Container with flexbox -->
+    <div class="content-container row">
+      <!-- Map Column -->
+      <div class="map-column col-lg-8 col-md-12">
+        <MapComponent />
+      </div>
+
+      <!-- Dashboard Section (Incidents and Teams) inside a scrollable box -->
+      <div class="dashboard-column col-lg-4 col-md-12">
+        <div class="dashboard-box">
+          <IncidentsList />
+          <TeamsList />
         </div>
       </div>
     </div>
@@ -20,47 +22,62 @@
 </template>
 
 <script>
+import Navbar from "@/components/Navbar.vue";
+import MapComponent from "@/components/AdminComponent/MapComponent.vue";
+import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
+import TeamsList from "@/components/AdminComponent/TeamsList.vue";
+
 export default {
-  name: 'UserManagement',
-  data() {
-    return {
-      users: [
-        { user_id: 1, username: 'admin', email: 'admin@example.com', role: 'yönetici' },
-        { user_id: 2, username: 'team_member1', email: 'member1@example.com', role: 'ekip_üyesi' },
-      ],
-    };
-  },
-  methods: {
-    editUser(user) {
-      // Handle edit user
-    },
-    deleteUser(user_id) {
-      // Handle delete user
-    },
-  },
+  name: "Admin",
+  components: {
+    Navbar,
+    MapComponent,
+    IncidentsList,
+    TeamsList
+  }
 };
 </script>
 
-<style scoped>
-.section-title {
-  font-weight: bold;
-  color: #343a40;
-  margin-bottom: 20px;
+<style>
+.admin-dashboard {
+  background-color: #faf8f9; /* Muted beige background color */
+  min-height: 100vh;
 }
 
-.card-title {
-  font-weight: 600;
+.content-container {
+  display: flex;
+  width: 100%;
+  padding: 20px;
+  margin: 0 auto;
 }
 
-.card {
-  transition: transform 0.2s ease;
+.map-column {
+  flex-grow: 1;
+  display: flex;
+  align-items: stretch;
+  padding-right: 10px;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+.dashboard-column {
+  flex-basis: 30%;
+  padding-left: 10px;
 }
 
-.btn {
-  margin-right: 10px;
+.dashboard-box {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto; /* Scrollbar ekledik */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+  }
+  .map-column {
+    height: 400px;
+  }
 }
 </style>
