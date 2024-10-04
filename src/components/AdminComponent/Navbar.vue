@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <!-- Branding -->
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="/src/assets/logo.png" class="brand-logo me-2" alt="Brand Logo" />
+        <img src="/src/assets/logo-no-background.png" class="brand-logo me-2" alt="Brand Logo" />
         <span class="brand-text">{{ brand }}</span>
       </a>
 
