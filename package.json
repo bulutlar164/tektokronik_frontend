@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.4",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.7.0",
     "mitt": "^3.0.1",
     "vue": "^3.4.29",
+    "vue-chartjs": "^5.3.1",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
