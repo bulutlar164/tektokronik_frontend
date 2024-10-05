@@ -9,15 +9,15 @@ import { createRouter, createWebHistory } from 'vue-router';
 import RouterTest from './views/RouterTest.vue';
 import Admin from "@/views/Admin.vue";
 import Login from './views/Login.vue';
-//Ati
+import User from './views/User.vue';
 //Emir
 //Sevket
 
 const routes = [
     {path:"/",component:RouterTest},
     {path:"/Admin",component:Admin},
-    {path:"/Login",component:Login}
-    //Ati
+    {path:"/Login",component:Login},
+    {path:"/User",component:User}
     //Emir
     //Sevket
 ]

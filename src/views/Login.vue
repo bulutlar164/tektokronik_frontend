@@ -153,7 +153,7 @@ export default {
   flex: 1; /* Take half of the screen */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  margin-top: 10%;
   align-items: center;
   padding: 2rem;
   background: rgba(255, 255, 255, 0); /* Semi-transparent background */

@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: "TeamsList",
+  name: "ConfirmationBox",
   data() {
     return {
       teams: [
