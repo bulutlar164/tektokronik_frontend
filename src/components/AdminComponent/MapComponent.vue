@@ -1,3 +1,4 @@
+
 <template>
   <div id="map" class="map-container"></div>
 </template>
@@ -6,12 +7,15 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';  // Veri çekmek için axios kullanılıyor
+import eventBus from '@/eventBus'; // EventBus'ı import ediyoruz
 
 export default {
   name: "MapComponent",
   data() {
     return {
+      map: null, // Harita referansı
       markersData: [], // Dinamik olarak doldurulacak
+      teamMarkers: [], // Ekip işaretçilerini tutmak için
       buildingImages: [
         'https://picsum.photos/150/150?random=1',
         'https://picsum.photos/150/150?random=2',
@@ -20,7 +24,7 @@ export default {
         'https://picsum.photos/150/150?random=5',
         'https://picsum.photos/150/150?random=6'
       ],
-      circleMarkers: [], // Tüm circle marker'ları tutmak için dizi
+      circleMarkers: [] // Tüm circle marker'ları tutmak için dizi
     };
   },
   methods: {
@@ -52,32 +56,21 @@ export default {
       return colorMap[locationType] || 'orange'; // Tanımlanmayan tipler için varsayılan renk
     },
     initMap() {
-      const map = L.map('map').setView([39.9334, 32.8597], 15);
+      // Haritayı başlatıyoruz
+      this.map = L.map('map').setView([39.9334, 32.8597], 15);
 
       L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      }).addTo(map);
+      }).addTo(this.map);
 
-      // Harita olaylarını dinleyiciler ekleyin
-      map.on('zoomstart', () => {
-        this.circleMarkers.forEach(marker => {
-          const el = marker.getElement();
-          if (el) {
-            el.classList.remove('pulse-animation');
-          }
-        });
-      });
+      this.addMarkers();
 
-      map.on('zoomend', () => {
-        this.circleMarkers.forEach(marker => {
-          const el = marker.getElement();
-          if (el) {
-            el.classList.add('pulse-animation');
-          }
-        });
-      });
-
+      // EventBus ile gelen konum verilerini dinliyoruz
+      eventBus.on('highlight-team-location', this.addTeamMarker);
+    },
+    addMarkers() {
+      // Lokasyonlara marker ekliyoruz
       this.markersData.forEach((data) => {
         const circleMarker = L.circleMarker(data.coords, {
           radius: 6,
@@ -85,9 +78,8 @@ export default {
           fillColor: data.color,
           fillOpacity: 1,
           className: 'custom-marker pulse-animation'
-        }).addTo(map);
+        }).addTo(this.map);
 
-        // Marker'ı diziye ekleyin
         this.circleMarkers.push(circleMarker);
 
         if (data.isNew) {
@@ -101,7 +93,7 @@ export default {
             iconSize: [50, 50],
             iconAnchor: [25, 50]
           });
-          L.marker(data.coords, {icon: newLabel}).addTo(map);
+          L.marker(data.coords, {icon: newLabel}).addTo(this.map);
         }
 
         circleMarker.bindPopup(`
@@ -114,18 +106,16 @@ export default {
 
         // Marker'a tıklandığında animasyonlu yakınlaştırma
         circleMarker.on('click', () => {
-          const currentZoom = map.getZoom();
+          const currentZoom = this.map.getZoom();
           const targetZoom = 18; // Yakınlaştırmak istediğiniz seviye
 
           if (currentZoom < targetZoom) {
-            // Animasyonlu yakınlaştırma ve haritayı merkeze alma
-            map.flyTo(data.coords, targetZoom, {
+            this.map.flyTo(data.coords, targetZoom, {
               animate: true,
               duration: 1.5 // Animasyonun süresi (saniye cinsinden)
             });
           } else {
-            // Sadece haritayı merkeze kaydırma
-            map.flyTo(data.coords, currentZoom, {
+            this.map.flyTo(data.coords, currentZoom, {
               animate: true,
               duration: 1.0
             });
@@ -134,10 +124,34 @@ export default {
           circleMarker.openPopup();
         });
       });
+    },
+    addTeamMarker({coordinates, teamName}) {
+      if (!coordinates || coordinates.length !== 2) {
+        console.error('Geçersiz koordinatlar:', coordinates);
+        return;
+      }
+
+      // Önceki ekip marker'ları temizle
+      this.teamMarkers.forEach(marker => this.map.removeLayer(marker));
+      this.teamMarkers = [];
+
+      // Yeni ekip konumu için marker ekleyelim
+      const marker = L.marker(coordinates).addTo(this.map)
+          .bindPopup(`<b>${teamName}</b>`)
+          .openPopup();
+
+      this.teamMarkers.push(marker);
+
+      // Haritayı bu konuma odaklıyoruz
+      this.map.setView(coordinates, 15, {animate: true});
     }
   },
   async mounted() {
     await this.fetchMarkersData(); // Component yüklendiğinde verileri çek
+  },
+  beforeDestroy() {
+    // EventBus dinleyicisini kaldırıyoruz
+    eventBus.off('highlight-team-location', this.addTeamMarker);
   }
 };
 </script>
@@ -179,10 +193,6 @@ export default {
     stroke-width: 6;
     r: 10;
   }
-}
-
-.custom-marker {
-  vector-effect: non-scaling-stroke; /* Yakınlaştırma ile marker boyutunu sabit tutar */
 }
 
 .new-label-wrapper {

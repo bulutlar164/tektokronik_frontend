@@ -53,10 +53,11 @@ export default {
               capacity: team.capacity,
               status: team.status,
               assignedRegion: team.assignedRegion,
+              // currentLocation verisini dizi formatına çeviriyoruz
               currentLocation: [
                 team.currentLocation.latitude,  // Enlem
                 team.currentLocation.longitude  // Boylam
-              ]  // Harita için koordinatları dizi formatına çeviriyoruz
+              ]
             }));
           })
           .catch(error => {
