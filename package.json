@@ -12,6 +12,7 @@
     "bootstrap": "^5.3.3",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.7.0",
+    "mitt": "^3.0.1",
     "vue": "^3.4.29",
     "vue-router": "^4.4.5"
   },

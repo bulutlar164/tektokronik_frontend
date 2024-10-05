@@ -49,7 +49,7 @@ export default {
         kaynak: 'blue',
         genel: 'purple'
       };
-      return colorMap[locationType] || 'gray';
+      return colorMap[locationType] || 'orange'; // Tanımlanmayan tipler için varsayılan renk
     },
     initMap() {
       const map = L.map('map').setView([39.9334, 32.8597], 15);

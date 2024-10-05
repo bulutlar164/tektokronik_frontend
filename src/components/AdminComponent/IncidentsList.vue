@@ -6,20 +6,20 @@
         <div
             class="timeline-item"
             v-for="incident in incidents"
-            :key="incident.id"
+            :key="incident.reportId"
         >
           <div class="timeline-marker"></div>
           <div class="timeline-content-wrapper">
             <div
                 class="timeline-content"
-                @click="toggleDetails(incident.id)"
+                @click="toggleDetails(incident.reportId)"
             >
               <span class="incident-time">{{ incident.timeAgo }}</span>
               <p class="incident-description">{{ incident.description }}</p>
             </div>
             <button
                 class="intervene-button"
-                @click.stop="intervene(incident.id)"
+                @click.stop="intervene(incident.reportId)"
             >
               Müdahale Et
             </button>
@@ -27,7 +27,7 @@
           <transition name="slide">
             <div
                 class="incident-details"
-                v-if="activeIncident === incident.id"
+                v-if="activeIncident === incident.reportId"
             >
               {{ incident.details }}
             </div>
@@ -39,55 +39,63 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: "IncidentsList",
   data() {
     return {
       activeIncident: null,
-      incidents: [
-        {
-          id: 1,
-          description: "23. Sokakta bina çökmesi",
-          timeAgo: "4 saat önce",
-          details:
-              "Bina ani bir şekilde çöktü ve kurtarma çalışmaları devam ediyor.",
-        },
-        {
-          id: 2,
-          description: "5. Cadde'de gaz kaçağı",
-          timeAgo: "6 saat önce",
-          details: "Bölgedeki gaz kaçağı nedeniyle evler tahliye ediliyor.",
-        },
-        {
-          id: 3,
-          description: "7. Sokakta yol kapandı",
-          timeAgo: "12 saat önce",
-          details:
-              "Ana yol üzerindeki çalışma nedeniyle trafik başka güzergahlara yönlendirildi.",
-        },
-        {
-          id: 4,
-          description: "10. Sokakta su baskını",
-          timeAgo: "1 gün önce",
-          details: "Yoğun yağışlar sonucu su baskınları meydana geldi.",
-        },
-        {
-          id: 5,
-          description: "Park alanında yangın",
-          timeAgo: "2 gün önce",
-          details: "Araç park alanında çıkan yangın kontrol altına alındı.",
-        },
-      ],
+      incidents: [], // Olaylar buraya backend'den yüklenecek
     };
+  },
+  mounted() {
+    this.fetchIncidents(); // Olayları sayfa yüklendiğinde backend'den çek
   },
   methods: {
     toggleDetails(id) {
       this.activeIncident = this.activeIncident === id ? null : id;
     },
     intervene(id) {
-      // Müdahale et butonuna tıklandığında yapılacak işlemler
-      alert(`Olay ID ${id} için müdahale ediliyor.`);
+      // Backend'e müdahale isteği gönder
+      axios.post(`http://localhost:8080/reports/${id}`, { reportStatus: 'işlemde' })
+          .then(response => {
+            alert(`Olay ID ${id} için müdahale başlatıldı.`);
+            this.fetchIncidents(); // Müdahaleden sonra olay listesini güncelle
+          })
+          .catch(error => {
+            console.error('Müdahale işlemi başarısız:', error);
+            alert('Müdahale sırasında bir hata oluştu.');
+          });
     },
+    fetchIncidents() {
+      // Olayları backend'den al
+      axios.get('http://localhost:8080/reports')
+          .then(response => {
+            console.log('Olaylar yüklendi:', response.data);
+            this.incidents = response.data.map(report => ({
+              reportId: report.reportId,
+              description: `${report.location.locationType} - ${report.buildingStatus}`,
+              timeAgo: this.calculateTimeAgo(report.updatedAt),
+              details: report.notes,
+            }));
+          })
+          .catch(error => {
+            console.error('Olaylar yüklenirken bir hata oluştu:', error);
+          });
+    },
+    calculateTimeAgo(updatedAt) {
+      // Olayın oluşma zamanına göre bir zaman farkı hesaplayıcı
+      const updatedDate = new Date(updatedAt);
+      const now = new Date();
+      const differenceInHours = Math.floor((now - updatedDate) / 36e5);
+      if (differenceInHours < 24) {
+        return `${differenceInHours} saat önce`;
+      } else {
+        const days = Math.floor(differenceInHours / 24);
+        return `${days} gün önce`;
+      }
+    }
   },
 };
 </script>
@@ -95,7 +103,7 @@ export default {
 <style>
 .incidents-section {
   margin-top: 20px;
-  }
+}
 
 .section-title {
   font-weight: bold;

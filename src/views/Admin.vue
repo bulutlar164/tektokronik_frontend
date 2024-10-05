@@ -6,12 +6,12 @@
     <!-- Main Content Container with flexbox -->
     <div class="content-container row">
       <!-- Map Column -->
-      <div class="map-column col-lg-8 col-md-12">
+      <div class="map-column col-lg-7 col-md-12"> <!-- Genişlik küçültüldü -->
         <MapComponent />
       </div>
 
       <!-- Dashboard Section (Incidents and Teams) -->
-      <div class="dashboard-column col-lg-4 col-md-12">
+      <div class="dashboard-column col-lg-5 col-md-12"> <!-- Dashboard kısmı genişletildi -->
         <IncidentsList />
         <TeamsList />
       </div>
@@ -74,7 +74,7 @@ export default {
 
 .map-column {
   height: 71vh;
-  flex-grow: 1;
+  flex-basis: 60%; /* Genişlik küçültüldü */
   display: flex;
   align-items: stretch;
   padding-right: 10px;
@@ -82,7 +82,7 @@ export default {
 
 .dashboard-column {
   height: 68vh;
-  flex-basis: 30%;
+  flex-basis: 40%; /* Dashboard genişliği artırıldı */
   padding-left: 10px;
 }
 
@@ -95,6 +95,7 @@ export default {
   width: 50%;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .content-container {
     flex-direction: column;
