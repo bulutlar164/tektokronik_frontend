@@ -6,12 +6,12 @@
     <!-- Main Content Container with flexbox -->
     <div class="content-container row">
       <!-- Map Column -->
-      <div class="map-column col-lg-8 col-md-12">
+      <div class="map-column col-lg-7 col-md-12"> <!-- Genişlik küçültüldü -->
         <MapComponent />
       </div>
 
       <!-- Dashboard Section (Incidents and Teams) -->
-      <div class="dashboard-column col-lg-4 col-md-12">
+      <div class="dashboard-column col-lg-5 col-md-12"> <!-- Dashboard kısmı genişletildi -->
         <IncidentsList />
         <TeamsList />
       </div>
@@ -31,7 +31,7 @@
 import Navbar from "@/components/Navbar.vue";
 import MapComponent from "@/components/AdminComponent/MapComponent.vue";
 import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
-import TeamsList from "@/components/AdminComponent/ConfirmationBox.vue";
+import TeamsList from "@/components/AdminComponent/TeamsList.vue";
 import DamageReportsBox from "@/components/AdminComponent/DamageReportsBox.vue";
 import CrowdDetectionsBox from "@/components/AdminComponent/CrowdDetectionsBox.vue";
 import ResourcesBox from "@/components/AdminComponent/ResourcesBox.vue";
@@ -73,16 +73,16 @@ export default {
 }
 
 .map-column {
-  height: 68vh;
-  flex-grow: 1;
+  height: 71vh;
+  flex-basis: 60%; /* Genişlik küçültüldü */
   display: flex;
   align-items: stretch;
   padding-right: 10px;
 }
 
 .dashboard-column {
-  height: 100%;
-  flex-basis: 30%;
+  height: 68vh;
+  flex-basis: 40%; /* Dashboard genişliği artırıldı */
   padding-left: 10px;
 }
 
@@ -95,6 +95,7 @@ export default {
   width: 50%;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .content-container {
     flex-direction: column;
