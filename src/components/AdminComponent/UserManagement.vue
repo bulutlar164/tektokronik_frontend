@@ -25,7 +25,7 @@
 import Navbar from "@/components/Navbar.vue";
 import MapComponent from "@/components/AdminComponent/MapComponent.vue";
 import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
-import TeamsList from "@/components/AdminComponent/ConfirmationBox.vue";
+import TeamsList from "@/components/AdminComponent/TeamsList.vue";
 
 export default {
   name: "Admin",

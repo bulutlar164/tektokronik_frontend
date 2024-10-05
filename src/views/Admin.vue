@@ -31,7 +31,7 @@
 import Navbar from "@/components/Navbar.vue";
 import MapComponent from "@/components/AdminComponent/MapComponent.vue";
 import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
-import TeamsList from "@/components/AdminComponent/ConfirmationBox.vue";
+import TeamsList from "@/components/AdminComponent/TeamsList.vue";
 import DamageReportsBox from "@/components/AdminComponent/DamageReportsBox.vue";
 import CrowdDetectionsBox from "@/components/AdminComponent/CrowdDetectionsBox.vue";
 import ResourcesBox from "@/components/AdminComponent/ResourcesBox.vue";
@@ -73,7 +73,7 @@ export default {
 }
 
 .map-column {
-  height: 68vh;
+  height: 71vh;
   flex-grow: 1;
   display: flex;
   align-items: stretch;
@@ -81,7 +81,7 @@ export default {
 }
 
 .dashboard-column {
-  height: 100%;
+  height: 68vh;
   flex-basis: 30%;
   padding-left: 10px;
 }

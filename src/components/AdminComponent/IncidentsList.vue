@@ -94,8 +94,8 @@ export default {
 
 <style>
 .incidents-section {
-  margin-bottom: 20px;
-}
+  margin-top: 20px;
+  }
 
 .section-title {
   font-weight: bold;
@@ -107,7 +107,7 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   padding: 15px;
-  max-height: 300px;
+  max-height: 28vh;
   overflow-y: auto;
   border: 1px solid #e0e0e0;
 }
