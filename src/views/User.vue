@@ -20,9 +20,9 @@
   </template>
   
   <script>
-  import Navbar from "@/components/UserComponent/Navbar.vue";
+  import Navbar from "@/components/Navbar.vue";
   import MapComponent from "@/components/UserComponent/MapComponent.vue";
-  import IncidentsList from "@/components/UserComponent/IncidentsList.vue";
+  import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
   import ConfirmationBox from "@/components/UserComponent/ConfirmationBox.vue";
   
   export default {

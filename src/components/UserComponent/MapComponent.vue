@@ -11,12 +11,12 @@ export default {
   data() {
     return {
       markersData: [
-        { id: 1, color: 'red', coords: [39.9334, 32.8597], info: 'Kırmızı Bina Bilgisi', requestSent: false },
-        { id: 2, color: 'yellow', coords: [39.9345, 32.8605], info: 'Sarı Bina Bilgisi', requestSent: false },
-        { id: 3, color: 'green', coords: [39.9355, 32.8615], info: 'Yeşil Bina Bilgisi', requestSent: false },
-        { id: 4, color: 'blue', coords: [39.9325, 32.8585], info: 'Mavi Bina Bilgisi', requestSent: false },
-        { id: 5, color: 'red', coords: [39.9315, 32.8575], info: 'Kırmızı Bina Bilgisi', requestSent: false },
-        { id: 6, color: 'yellow', coords: [39.9365, 32.8625], info: 'Sarı Bina Bilgisi', requestSent: false }
+        { color: 'red', coords: [39.9334, 32.8597], info: 'Kırmızı Bina Bilgisi', isRequestSent: false },
+        { color: 'yellow', coords: [39.9345, 32.8605], info: 'Sarı Bina Bilgisi', isRequestSent: false },
+        { color: 'green', coords: [39.9355, 32.8615], info: 'Yeşil Bina Bilgisi', isRequestSent: false },
+        { color: 'blue', coords: [39.9325, 32.8585], info: 'Mavi Bina Bilgisi', isRequestSent: false },
+        { color: 'red', coords: [39.9315, 32.8575], info: 'Kırmızı Bina Bilgisi', isRequestSent: false },
+        { color: 'yellow', coords: [39.9365, 32.8625], info: 'Sarı Bina Bilgisi', isRequestSent: false }
       ],
       buildingImages: [
         'https://picsum.photos/150/150?random=1',
@@ -32,37 +32,6 @@ export default {
     getRandomBuildingImage() {
       return this.buildingImages[Math.floor(Math.random() * this.buildingImages.length)];
     },
-    handleButtonClick(event, markerId) {
-      // İlgili markerın requestSent durumunu true yapıyoruz
-      const marker = this.markersData.find(m => m.id === markerId);
-      if (marker) {
-        marker.requestSent = true;
-      }
-
-      // Butonun metnini ve rengini değiştiriyoruz
-      const button = event.target;
-      button.textContent = 'İstek Gönderildi'; // Butonun yazısını değiştir
-      button.style.backgroundColor = 'green';  // Butonun rengini yeşil yap
-      button.disabled = true;  // Butonu devre dışı bırak
-    },
-    applyButtonClickListeners(markerId) {
-      const marker = this.markersData.find(m => m.id === markerId);
-      if (marker && marker.requestSent) {
-        // Eğer istek zaten gönderildiyse, butonun durumunu koruyoruz
-        const button = document.querySelector('.request-button');
-        if (button) {
-          button.textContent = 'İstek Gönderildi';
-          button.style.backgroundColor = 'green';
-          button.disabled = true;
-        }
-      } else {
-        // Eğer istek gönderilmediyse, normal olay dinleyiciyi ekliyoruz
-        const button = document.querySelector('.request-button');
-        if (button) {
-          button.addEventListener('click', (event) => this.handleButtonClick(event, markerId));
-        }
-      }
-    },
     initMap() {
       const map = L.map('map').setView([39.9334, 32.8597], 15);
 
@@ -71,34 +40,50 @@ export default {
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       }).addTo(map);
 
-      this.markersData.forEach((data) => {
-        const markerIcon = L.divIcon({
-          className: `animated-marker ${data.color}`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-        });
+      this.markersData.forEach((data, index) => {
+        const circleMarker = L.circleMarker(data.coords, {
+          radius: 6,
+          color: data.color,
+          fillColor: data.color,
+          fillOpacity: 1,
+          className: 'custom-marker pulse-animation'
+        }).addTo(map);
 
-        const marker = L.marker(data.coords, { icon: markerIcon }).addTo(map);
-
-        // Buton içeren popup'ı tanımlıyoruz
+        // Popup ile bina bilgilerini gösterme ve butonu ortalama
         const popupContent = `
-          <b>${data.info}</b><br>
-          Adres: Ankara, Türkiye<br>
-          Yükseklik: ${Math.floor(Math.random() * 50) + 10}m<br>
-          Durum: ${Math.random() > 0.5 ? 'Riskli' : 'Güvenli'}<br>
-          <img src="${this.getRandomBuildingImage()}" alt="Bina Resmi" style="width:150px;height:150px;"/><br>
-          <div style="text-align: center; margin-top: 10px;">
-            <button class="request-button" style="padding: 10px 20px; background-color: red; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: center; font-size: 14px;">
-              İstek Gönder
-            </button>
+          <div style="text-align: center;">
+            <b>${data.info}</b><br>
+            Adres: Ankara, Türkiye<br>
+            Yükseklik: ${Math.floor(Math.random() * 50) + 10}m<br>
+            Durum: ${Math.random() > 0.5 ? 'Riskli' : 'Güvenli'}<br>
+            <img src="${this.getRandomBuildingImage()}" alt="Bina Resmi" style="width:150px;height:150px;"/><br><br>
+            <button id="request-btn-${index}" class="request-btn">${data.isRequestSent ? 'İstek Gönderildi' : 'İstek Gönder'}</button>
           </div>
         `;
 
-        marker.bindPopup(popupContent);
+        circleMarker.bindPopup(popupContent);
 
-        // Popup açıldığında butonları bul ve olay dinleyicilerini ekle
-        marker.on('popupopen', () => {
-          setTimeout(() => this.applyButtonClickListeners(data.id), 10); // Pop-up açıldıktan sonra butonlara tıklama olaylarını ekle
+        circleMarker.on('click', () => {
+          circleMarker.openPopup();
+
+          this.$nextTick(() => {
+            const requestButton = document.getElementById(`request-btn-${index}`);
+
+            // Her popup açıldığında butonun state'ini güncelle
+            if (data.isRequestSent) {
+              requestButton.innerText = 'İstek Gönderildi';
+              requestButton.style.backgroundColor = 'green';
+            }
+
+            // Buton tıklaması ile state güncelleme
+            requestButton.addEventListener('click', () => {
+              if (!data.isRequestSent) {
+                data.isRequestSent = true;
+                requestButton.innerText = 'İstek Gönderildi';
+                requestButton.style.backgroundColor = 'green';
+              }
+            });
+          });
         });
       });
     }
@@ -109,78 +94,66 @@ export default {
 };
 </script>
 
-<style scoped>
-html, body, #app {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
+<style>
 #map {
   height: 100%;
   width: 100%;
 }
 
 .map-container {
-  height: 100%;
+  height: 400px;
   width: 100%;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.animated-marker) {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.8);
+.custom-marker {
   position: relative;
 }
 
-:deep(.animated-marker::before) {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: inherit;
-  animation: pulse 1.5s infinite ease-out;
-  transform: translate(-50%, -50%);
+.pulse-animation {
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
+    stroke-opacity: 0.9;
+    stroke-width: 13;
+    r: 6;
+  }
+  30% {
+    stroke-opacity: 0.6;
+    stroke-width: 15;
+    r: 8;
   }
   50% {
-    transform: translate(-50%, -50%) scale(2);
-    opacity: 0.7;
+    stroke-opacity: 0.3;
+    stroke-width: 20;
+    r: 9;
+  }
+  70% {
+    stroke-opacity: 0.1;
+    stroke-width: 23;
+    r: 10;
   }
   100% {
-    transform: translate(-50%, -50%) scale(3);
-    opacity: 0;
+    stroke-opacity: 0;
+    stroke-width: 25;
+    r: 10;
   }
 }
 
-:deep(.animated-marker.red) {
-  background-color: rgba(255, 0, 0, 0.9);
+.request-btn {
+  padding: 8px 16px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-:deep(.animated-marker.yellow) {
-  background-color: rgba(255, 215, 0, 0.9);
-}
-
-:deep(.animated-marker.green) {
-  background-color: rgba(0, 255, 0, 0.9);
-}
-
-:deep(.animated-marker.blue) {
-  background-color: rgba(0, 0, 255, 0.9);
-}
-
-.request-button:disabled {
-  cursor: not-allowed;
+.request-btn:active {
+  transform: scale(0.98);
+  background-color: darkred;
 }
 </style>
