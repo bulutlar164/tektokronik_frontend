@@ -14,7 +14,7 @@ import User from './views/User.vue';
 //Sevket
 
 const routes = [
-    {path:"/",component:RouterTest},
+    {path:"/",component:Login},
     {path:"/Admin",component:Admin},
     {path:"/Login",component:Login},
     {path:"/User",component:User}
