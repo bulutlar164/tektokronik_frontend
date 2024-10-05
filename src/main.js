@@ -10,6 +10,7 @@ import RouterTest from './views/RouterTest.vue';
 import Admin from "@/views/Admin.vue";
 import Login from './views/Login.vue';
 import User from './views/User.vue';
+import StatisticsPage from './views/StatisticsPage.vue';
 //Emir
 //Sevket
 
@@ -17,7 +18,8 @@ const routes = [
     {path:"/",component:Login},
     {path:"/Admin",component:Admin},
     {path:"/Login",component:Login},
-    {path:"/User",component:User}
+    {path:"/User",component:User},
+    {path:"/StatisticsPage",component:StatisticsPage}
     //Emir
     //Sevket
 ]

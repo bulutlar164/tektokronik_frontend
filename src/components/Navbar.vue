@@ -27,6 +27,10 @@
           <li class="nav-item" v-for="(link, index) in links" :key="index">
             <a class="nav-link active nav-link-text" :href="link.url">{{ link.label }}</a>
           </li>
+          <!-- İstatistikler Linki -->
+          <li class="nav-item">
+            <a class="nav-link active nav-link-text" href="/StatisticsPage">İstatistikler</a>
+          </li>
 
           <!-- Optional: Dropdown for admin-specific actions -->
           <li class="nav-item dropdown">
