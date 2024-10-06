@@ -19,10 +19,9 @@
 
     <!-- Information Boxes with Functional Buttons -->
     <div class="boxes row mt-4">
-      <DamageReportsBox />
       <CrowdDetectionsBox />
       <ResourcesBox />
-      <EquipmentBox />
+      <DamageReportsBox />
     </div>
   </div>
 </template>
@@ -32,7 +31,7 @@ import Navbar from "@/components/Navbar.vue";
 import MapComponent from "@/components/AdminComponent/MapComponent.vue";
 import IncidentsList from "@/components/AdminComponent/IncidentsList.vue";
 import TeamsList from "@/components/AdminComponent/TeamsList.vue";
-import DamageReportsBox from "@/components/AdminComponent/DamageReportsBox.vue";
+import DamageReportsBox from "@/components/AdminComponent/GuidanceBox.vue";
 import CrowdDetectionsBox from "@/components/AdminComponent/CrowdDetectionsBox.vue";
 import ResourcesBox from "@/components/AdminComponent/ResourcesBox.vue";
 import EquipmentBox from "@/components/AdminComponent/EquipmentBox.vue";
@@ -54,7 +53,7 @@ export default {
 
 <style scoped>
 .admin-dashboard {
-  background-color: #faf8f9; /* Muted beige background color */
+  background-color: #F5EFE6;
   min-height: 100vh;
 }
 

@@ -3,10 +3,14 @@
     <h5 class="section-title">Ekipler</h5>
     <div class="teams-grid">
       <div class="team-card" v-for="team in teams" :key="team.id">
-        <div class="card team-card-content">
+        <div class="card team-card-content" :class="{ 'available-card': team.status === 'uygun', 'busy-card': team.status === 'meşgul' || team.status === 'müsait değil' }">
           <div class="card-body">
             <h6 class="card-title team-name">
               <i class="fas fa-users mr-2" style="color: #007bff;"></i>{{ team.teamName }}
+              <!-- Eğer takım status 'uygun' ise onay işareti ekliyoruz -->
+              <span v-if="team.status === 'uygun'" class="available-icon">
+                <i class="fas fa-check-circle available-icon-inner" style="color: green; margin-left: 8px;"></i>
+              </span>
             </h6>
             <p class="card-text">
               <span class="label">Görev Yeri:</span> {{ team.assignedRegion }}<br />
@@ -48,12 +52,11 @@ export default {
       axios.get('http://localhost:8080/api/emergency-teams')
           .then(response => {
             this.teams = response.data.map(team => ({
-              id: team.id,
+              id: team.teamId,   // Konsolda 'teamId' anahtarı kullanılıyor
               teamName: team.teamName,
               capacity: team.capacity,
-              status: team.status,
+              status: team.status,  // 'uygun' veya başka değerler olabilir
               assignedRegion: team.assignedRegion,
-              // currentLocation verisini dizi formatına çeviriyoruz
               currentLocation: [
                 team.currentLocation.latitude,  // Enlem
                 team.currentLocation.longitude  // Boylam
@@ -119,6 +122,14 @@ export default {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
+.available-card {
+  box-shadow: 0 0 10px rgba(47, 166, 30, 0.56); /* "uygun" durumunda yeşil gölge */
+}
+
+.busy-card {
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* "meşgul" veya "müsait değil" durumunda kırmızı gölge */
+}
+
 .card-body {
   padding: 15px;
 }
@@ -170,6 +181,16 @@ export default {
   background-color: #28a745;
   color: white;
   border-color: #28a745;
+}
+
+.available-icon {
+  display: inline-grid;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.available-icon-inner {
+  display: inline-block;
 }
 
 /* Responsive adjustments */

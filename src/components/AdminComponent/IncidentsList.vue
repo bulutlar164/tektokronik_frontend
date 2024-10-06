@@ -1,7 +1,7 @@
 <template>
   <div class="incidents-section mb-4">
-    <h5 class="section-title">Olaylar</h5>
     <div class="incidents-box">
+    <h5 class="section-title">Olaylar</h5>
       <div class="timeline">
         <div
             class="timeline-item"
