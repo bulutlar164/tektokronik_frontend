@@ -11,7 +11,7 @@ import Admin from "@/views/Admin.vue";
 import Login from './views/Login.vue';
 import User from './views/User.vue';
 import StatisticsPage from './views/StatisticsPage.vue';
-//Emir
+import AIPage from './views/AIPage.vue';
 //Sevket
 
 const routes = [
@@ -19,8 +19,8 @@ const routes = [
     {path:"/Admin",component:Admin},
     {path:"/Login",component:Login},
     {path:"/User",component:User},
-    {path:"/StatisticsPage",component:StatisticsPage}
-    //Emir
+    {path:"/StatisticsPage",component:StatisticsPage},
+    {path:"/AI",component:AIPage}
     //Sevket
 ]
 

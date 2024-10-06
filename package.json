@@ -9,12 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.4",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.7.0",
     "mitt": "^3.0.1",
     "sweetalert2": "^11.14.1",
+    "tektokronik_web": "file:",
     "vue": "^3.4.29",
     "vue-chartjs": "^5.3.1",
     "vue-router": "^4.4.5"
