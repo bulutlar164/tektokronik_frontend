@@ -1,31 +1,54 @@
 <template>
-  <div class="teams-container">
-    <h5 class="section-title">Ekipler</h5>
-    <div class="teams-grid">
-      <div class="team-card" v-for="team in teams" :key="team.id">
-        <div class="card team-card-content" :class="{ 'available-card': team.status === 'uygun', 'busy-card': team.status === 'meşgul' || team.status === 'müsait değil' }">
-          <div class="card-body">
-            <h6 class="card-title team-name">
-              <i class="fas fa-users mr-2" style="color: #007bff;"></i>{{ team.teamName }}
-              <!-- Eğer takım status 'uygun' ise onay işareti ekliyoruz -->
-              <span v-if="team.status === 'uygun'" class="available-icon">
-                <i class="fas fa-check-circle available-icon-inner" style="color: green; margin-left: 8px;"></i>
-              </span>
-            </h6>
-            <p class="card-text">
-              <span class="label">Görev Yeri:</span> {{ team.assignedRegion }}<br />
-              <span class="label">Toplam Kapasite:</span> {{ team.capacity }}<br />
-              <span class="label">Uygunluk:</span> {{ team.status }}
-            </p>
-          </div>
-          <!-- Kartın altına butonları yerleştiriyoruz -->
-          <div class="card-footer">
-            <button class="btn btn-outline-primary btn-block" @click="showTeamLocation(team)">
-              Konumu Haritada Gör
-            </button>
-            <button class="btn btn-outline-success btn-block mt-2" @click="assignTeam(team)">
-              Yönlendir
-            </button>
+  <div class="card p-4 card-elevated main-card">
+    <div class="card-header bg-primary text-white text-center gradient-header">
+      <h5 class="card-title mb-0">Ekipler</h5>
+    </div>
+    <div class="teams-container"> <!-- Scroll ve boyut için container -->
+      <div class="teams-grid">
+        <div class="team-card" v-for="team in teams" :key="team.id">
+          <div
+              class="card team-card-content"
+              :class="{
+              'available-card': team.status === 'uygun',
+              'busy-card':
+                team.status === 'meşgul' || team.status === 'müsait değil'
+            }"
+          >
+            <div class="card-body">
+              <h6 class="card-title team-name">
+                <i class="fas fa-users mr-2" style="color: #007bff;"></i>
+                {{ team.teamName }}
+                <!-- Eğer takım status 'uygun' ise onay işareti ekliyoruz -->
+                <span v-if="team.status === 'uygun'" class="available-icon">
+                  <i
+                      class="fas fa-check-circle available-icon-inner"
+                      style="color: green; margin-left: 8px;"
+                  ></i>
+                </span>
+              </h6>
+              <p class="card-text">
+                <span class="label">Görev Yeri:</span> {{ team.assignedRegion
+                }}<br />
+                <span class="label">Toplam Kapasite:</span> {{ team.capacity
+                }}<br />
+                <span class="label">Uygunluk:</span> {{ team.status }}
+              </p>
+            </div>
+            <!-- Kartın altına butonları yerleştiriyoruz -->
+            <div class="card-footer">
+              <button
+                  class="btn btn-outline-primary btn-block"
+                  @click="showTeamLocation(team)"
+              >
+                Konumu Haritada Gör
+              </button>
+              <button
+                  class="btn btn-outline-success btn-block mt-2"
+                  @click="assignTeam(team)"
+              >
+                Yönlendir
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -35,13 +58,13 @@
 
 <script>
 import axios from 'axios';
-import eventBus from '@/eventBus';  // EventBus ile harita iletişimi için
+import eventBus from '@/eventBus'; // EventBus ile harita iletişimi için
 
 export default {
-  name: "TeamsList",
+  name: 'TeamsList',
   data() {
     return {
-      teams: [] // Veriler backend'den yüklenecek
+      teams: [], // Veriler backend'den yüklenecek
     };
   },
   mounted() {
@@ -49,21 +72,22 @@ export default {
   },
   methods: {
     fetchTeams() {
-      axios.get('http://localhost:8080/api/emergency-teams')
-          .then(response => {
-            this.teams = response.data.map(team => ({
-              id: team.teamId,   // Konsolda 'teamId' anahtarı kullanılıyor
+      axios
+          .get('http://localhost:8080/api/emergency-teams')
+          .then((response) => {
+            this.teams = response.data.map((team) => ({
+              id: team.teamId, // Konsolda 'teamId' anahtarı kullanılıyor
               teamName: team.teamName,
               capacity: team.capacity,
-              status: team.status,  // 'uygun' veya başka değerler olabilir
+              status: team.status, // 'uygun' veya başka değerler olabilir
               assignedRegion: team.assignedRegion,
               currentLocation: [
-                team.currentLocation.latitude,  // Enlem
-                team.currentLocation.longitude  // Boylam
-              ]
+                team.currentLocation.latitude, // Enlem
+                team.currentLocation.longitude, // Boylam
+              ],
             }));
           })
-          .catch(error => {
+          .catch((error) => {
             console.error('Ekipler yüklenirken bir hata oluştu:', error);
           });
     },
@@ -71,22 +95,30 @@ export default {
       // EventBus ile MapComponent'e ekibin ismini ve konumunu gönderiyoruz
       eventBus.emit('highlight-team-location', {
         coordinates: team.currentLocation,
-        teamName: team.teamName
+        teamName: team.teamName,
       });
     },
     assignTeam(team) {
       alert(`${team.teamName} ekibi yönlendirildi!`);
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
+.main-card {
+  /* İsteğe bağlı: Kartın maksimum yüksekliğini belirleyin */
+  max-height: 80vh; /* Gerekirse bu değeri ayarlayın */
+  /* İsteğe bağlı: Genişlik veya diğer boyut ayarları */
+  /* width: 90%; */
+  /* margin: auto; */
+}
+
 .teams-container {
   background-color: #fff;
   padding: 15px;
   border-radius: 8px;
-  height: 35vh; /* Sabit yükseklik */
+  height: 32vh; /* Yüksekliği azalttık */
   overflow-y: auto; /* İçerik taşarsa scroll bar ekler */
   scrollbar-width: thin; /* Scroll bar genişliğini ince yapar */
   scrollbar-color: #007bff #e0e0e0; /* Scroll barın rengi */
@@ -95,6 +127,7 @@ export default {
 .teams-grid {
   display: flex;
   flex-wrap: wrap;
+  height: 28vh; /* Yüksekliği azalttık */
   gap: 15px; /* Kartlar arası boşluk */
 }
 
@@ -163,7 +196,8 @@ export default {
   width: 100%; /* Butonların tam genişlikte olmasını sağlıyoruz */
 }
 
-.btn-outline-primary, .btn-outline-success {
+.btn-outline-primary,
+.btn-outline-success {
   padding: 8px 12px;
   font-size: 14px;
   border: 1px solid;
@@ -213,5 +247,14 @@ export default {
 
 .teams-container::-webkit-scrollbar-track {
   background-color: #e0e0e0; /* Scrollbar arka planı */
+}
+
+/* Başlık için stil */
+.gradient-header {
+  background: linear-gradient(90deg, #4e73df, #224abe);
+  padding: 15px;
+  font-size: 1.25rem;
+  color: white;
+  border-radius: 8px 8px 0 0;
 }
 </style>

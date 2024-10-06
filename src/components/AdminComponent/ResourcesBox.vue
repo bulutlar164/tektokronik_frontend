@@ -2,7 +2,7 @@
   <div class="col-lg-6 col-md-12 mb-4">
     <div class="card h-100 p-4 card-elevated">
       <div class="card-header bg-primary text-white text-center gradient-header">
-        <h5 class="card-title mb-0">Anlık Yönlendirme Durumları</h5>
+        <h5 class="card-title mb-0">Ekipmanların Durumları</h5>
       </div>
       <div class="card-body">
         <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">

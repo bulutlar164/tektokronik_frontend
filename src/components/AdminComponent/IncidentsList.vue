@@ -1,43 +1,32 @@
 <template>
-  <div class="incidents-section mb-4">
-    <div class="incidents-box">
-    <h5 class="section-title">Olaylar</h5>
-      <div class="timeline">
-        <div
-            class="timeline-item"
-            v-for="incident in incidents"
-            :key="incident.reportId"
-        >
+  <div class="card p-3 card-elevated main-card mb-2">
+    <div class="card-header bg-primary text-white text-center gradient-header">
+      <h5 class="card-title mb-0">Olaylar</h5>
+    </div>
+    <div class="incidents-container incidents-scroll">
+      <div class="timeline" v-if="!loading">
+        <div class="timeline-item" v-for="incident in incidents" :key="incident.reportId">
           <div class="timeline-marker"></div>
           <div class="timeline-content-wrapper">
-            <div
-                class="timeline-content"
-                @click="toggleDetails(incident.reportId)"
-            >
+            <div class="timeline-content" @click="toggleDetails(incident.reportId)">
               <span class="incident-time">{{ incident.timeAgo }}</span>
               <p class="incident-description">{{ incident.description }}</p>
             </div>
-            <button
-                class="intervene-button"
-                @click.stop="intervene(incident.reportId)"
-            >
+            <button class="intervene-button" @click.stop="handleIntervene(incident.reportId)">
               Müdahale Et
             </button>
           </div>
           <transition name="slide">
-            <div
-                class="incident-details"
-                v-if="activeIncident === incident.reportId"
-            >
+            <div class="incident-details" v-if="activeIncident === incident.reportId">
               {{ incident.details }}
             </div>
           </transition>
         </div>
       </div>
+      <div v-else class="loading-spinner">Yükleniyor...</div>
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 
@@ -45,31 +34,16 @@ export default {
   name: "IncidentsList",
   data() {
     return {
+      loading: true,
+      incidents: [],
       activeIncident: null,
-      incidents: [], // Olaylar buraya backend'den yüklenecek
     };
   },
   mounted() {
-    this.fetchIncidents(); // Olayları sayfa yüklendiğinde backend'den çek
+    this.fetchIncidents();
   },
   methods: {
-    toggleDetails(id) {
-      this.activeIncident = this.activeIncident === id ? null : id;
-    },
-    intervene(id) {
-      // Backend'e müdahale isteği gönder
-      axios.post(`http://localhost:8080/reports/${id}`, { reportStatus: 'işlemde' })
-          .then(response => {
-            alert(`Olay ID ${id} için müdahale başlatıldı.`);
-            this.fetchIncidents(); // Müdahaleden sonra olay listesini güncelle
-          })
-          .catch(error => {
-            console.error('Müdahale işlemi başarısız:', error);
-            alert('Müdahale sırasında bir hata oluştu.');
-          });
-    },
     fetchIncidents() {
-      // Olayları backend'den al
       axios.get('http://localhost:8080/reports')
           .then(response => {
             console.log('Olaylar yüklendi:', response.data);
@@ -79,13 +53,28 @@ export default {
               timeAgo: this.calculateTimeAgo(report.updatedAt),
               details: report.notes,
             }));
+            this.loading = false;
           })
           .catch(error => {
             console.error('Olaylar yüklenirken bir hata oluştu:', error);
+            this.loading = false;
           });
     },
+    handleIntervene(id) {
+      axios.post(`http://localhost:8080/reports/${id}`, { reportStatus: 'işlemde' })
+          .then(() => {
+            alert(`Olay ID ${id} için müdahale başlatıldı.`);
+            this.fetchIncidents();
+          })
+          .catch(error => {
+            console.error('Müdahale işlemi başarısız:', error);
+            alert('Müdahale sırasında bir hata oluştu.');
+          });
+    },
+    toggleDetails(id) {
+      this.activeIncident = this.activeIncident === id ? null : id;
+    },
     calculateTimeAgo(updatedAt) {
-      // Olayın oluşma zamanına göre bir zaman farkı hesaplayıcı
       const updatedDate = new Date(updatedAt);
       const now = new Date();
       const differenceInHours = Math.floor((now - updatedDate) / 36e5);
@@ -95,61 +84,84 @@ export default {
         const days = Math.floor(differenceInHours / 24);
         return `${days} gün önce`;
       }
-    }
+    },
   },
 };
 </script>
-
-<style>
-.incidents-section {
-  margin-top: 20px;
+<style scoped>
+.main-card {
+  max-height: 70vh;
 }
 
-.section-title {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.incidents-box {
+.incidents-container {
   background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  max-height: 28vh;
+  padding: 10px;
+  border-radius: 6px;
+  height: 24vh;
+  width: 100%;
   overflow-y: auto;
-  border: 1px solid #e0e0e0;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #007bff #e0e0e0;
 }
 
-.timeline {
-  position: relative;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.incidents-scroll {
+  overflow-y: auto;
 }
 
-.timeline::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  width: 2px;
-  height: 100%;
-  background: #d3d3d3;
+.incidents-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.incidents-scroll::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 8px;
+}
+
+.incidents-scroll::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 15px;
+  font-size: 14px;
+  color: #555;
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 20px;
-  padding-left: 40px;
+  margin-bottom: 30px; /* Noktalar arasındaki boşluğu artırıyoruz */
+  padding-left: 30px;
 }
 
 .timeline-marker {
   position: absolute;
-  left: 14px;
-  width: 12px;
-  height: 12px;
+  left: 10px;
+  width: 10px;
+  height: 10px;
   background: #ff6b6b;
   border-radius: 50%;
+}
+
+.timeline-marker::before {
+  content: '';
+  position: absolute;
+  top: 0; /* Çizgi, noktanın tam ortasından değil üstünden başlar */
+  left: 50%;
+  width: 2px;
+  height: 100%; /* Çizgi, tam olarak bir olayın yüksekliği kadar olur */
+  background-color: #ff6b6b;
+  transform: translateX(-50%);
+  z-index: -1; /* Çizgiyi noktanın arkasına alıyoruz */
+}
+
+.timeline-item:first-child .timeline-marker::before {
+  top: 50%; /* İlk olayın üstündeki çizginin yarısını kaldırmak için */
+}
+
+.timeline-item:last-child .timeline-marker::before {
+  display: none; /* Son olaydan sonra çizgi olmasın */
 }
 
 .timeline-content-wrapper {
@@ -159,7 +171,7 @@ export default {
 }
 
 .timeline-content {
-  padding: 5px 0;
+  padding: 3px 0;
   cursor: pointer;
 }
 
@@ -168,13 +180,13 @@ export default {
 }
 
 .incident-time {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
   margin-bottom: 2px;
 }
 
 .incident-description {
-  font-size: 14px;
+  font-size: 13px;
   color: #555;
   margin: 0;
 }
@@ -184,8 +196,8 @@ export default {
   color: #333;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -195,16 +207,15 @@ export default {
 }
 
 .incident-details {
-  padding: 10px 15px;
-  margin-top: 5px;
+  padding: 8px 12px;
+  margin-top: 4px;
   background-color: #f7f7f7;
   border-left: 2px solid #ff6b6b;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #444;
 }
 
-/* Geçiş animasyonu */
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.3s ease;
@@ -222,5 +233,27 @@ export default {
   max-height: 100px;
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Scrollbar stili */
+.incidents-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.incidents-container::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 8px;
+}
+
+.incidents-container::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+}
+
+.gradient-header {
+  background: linear-gradient(90deg, #4e73df, #224abe);
+  padding: 10px;
+  font-size: 1rem;
+  color: white;
+  border-radius: 6px 6px 0 0;
 }
 </style>

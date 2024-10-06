@@ -72,7 +72,7 @@ export default {
 }
 
 .map-column {
-  height: 71vh;
+  height: 76vh;
   flex-basis: 60%; /* Genişlik küçültüldü */
   display: flex;
   align-items: stretch;
