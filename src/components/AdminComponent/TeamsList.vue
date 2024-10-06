@@ -40,7 +40,7 @@
                   class="btn btn-outline-primary btn-block"
                   @click="showTeamLocation(team)"
               >
-                Konumu Haritada Gör
+                Haritada Gör
               </button>
               <button
                   class="btn btn-outline-success btn-block mt-2"
