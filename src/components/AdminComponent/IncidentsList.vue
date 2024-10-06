@@ -4,8 +4,8 @@
       <h5 class="card-title mb-0">Olaylar</h5>
     </div>
     <div class="incidents-container incidents-scroll">
-      <div class="timeline" v-if="!loading">
-        <div class="timeline-item" v-for="incident in incidents" :key="incident.reportId">
+      <ul class="timeline" v-if="!loading">
+        <li class="timeline-item" v-for="incident in incidents" :key="incident.reportId">
           <div class="timeline-marker"></div>
           <div class="timeline-content-wrapper">
             <div class="timeline-content" @click="toggleDetails(incident.reportId)">
@@ -21,8 +21,8 @@
               {{ incident.details }}
             </div>
           </transition>
-        </div>
-      </div>
+        </li>
+      </ul>
       <div v-else class="loading-spinner">Yükleniyor...</div>
     </div>
   </div>
@@ -129,39 +129,36 @@ export default {
   color: #555;
 }
 
+.timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 2px;
+  height: 100%;
+  background: #d3d3d3;
+}
+
 .timeline-item {
   position: relative;
-  margin-bottom: 30px; /* Noktalar arasındaki boşluğu artırıyoruz */
-  padding-left: 30px;
+  margin-bottom: 20px;
+  padding-left: 40px;
 }
 
 .timeline-marker {
   position: absolute;
-  left: 10px;
-  width: 10px;
-  height: 10px;
+  left: 14px;
+  width: 12px;
+  height: 12px;
   background: #ff6b6b;
   border-radius: 50%;
-}
-
-.timeline-marker::before {
-  content: '';
-  position: absolute;
-  top: 0; /* Çizgi, noktanın tam ortasından değil üstünden başlar */
-  left: 50%;
-  width: 2px;
-  height: 100%; /* Çizgi, tam olarak bir olayın yüksekliği kadar olur */
-  background-color: #ff6b6b;
-  transform: translateX(-50%);
-  z-index: -1; /* Çizgiyi noktanın arkasına alıyoruz */
-}
-
-.timeline-item:first-child .timeline-marker::before {
-  top: 50%; /* İlk olayın üstündeki çizginin yarısını kaldırmak için */
-}
-
-.timeline-item:last-child .timeline-marker::before {
-  display: none; /* Son olaydan sonra çizgi olmasın */
 }
 
 .timeline-content-wrapper {
@@ -171,7 +168,7 @@ export default {
 }
 
 .timeline-content {
-  padding: 3px 0;
+  padding: 5px 0;
   cursor: pointer;
 }
 
@@ -180,13 +177,13 @@ export default {
 }
 
 .incident-time {
-  font-size: 11px;
+  font-size: 12px;
   color: #999;
   margin-bottom: 2px;
 }
 
 .incident-description {
-  font-size: 13px;
+  font-size: 14px;
   color: #555;
   margin: 0;
 }
@@ -196,8 +193,8 @@ export default {
   color: #333;
   border: none;
   border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 11px;
+  padding: 6px 12px;
+  font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -207,15 +204,16 @@ export default {
 }
 
 .incident-details {
-  padding: 8px 12px;
-  margin-top: 4px;
+  padding: 10px 15px;
+  margin-top: 5px;
   background-color: #f7f7f7;
   border-left: 2px solid #ff6b6b;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: #444;
 }
 
+/* Geçiş animasyonu */
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.3s ease;
@@ -233,20 +231,6 @@ export default {
   max-height: 100px;
   opacity: 1;
   transform: translateY(0);
-}
-
-/* Scrollbar stili */
-.incidents-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.incidents-container::-webkit-scrollbar-thumb {
-  background-color: #007bff;
-  border-radius: 8px;
-}
-
-.incidents-container::-webkit-scrollbar-track {
-  background-color: #e0e0e0;
 }
 
 .gradient-header {

@@ -1,13 +1,15 @@
 <template>
   <div class="col-lg-6 col-md-12 mb-4">
-    <div class="card h-100 p-4">
+    <div class="card h-100 p-4 card-elevated">
+      <div class="card-header bg-primary text-white text-center gradient-header">
+        <h5 class="card-title mb-0">Ekipmanların Durumları</h5>
+      </div>
       <div class="card-body">
-        <h5 class="card-title text-center">Mevcut Kaynaklar</h5>
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-bordered table-striped">
+        <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover table-striped table-bordered">
             <thead class="thead-dark">
             <tr>
-              <th>Kaynak Tipi</th>
+              <th>Kaynak Türü</th>
               <th>Mevcut Miktar</th>
               <th>Konum</th>
               <th>İşlem</th>
@@ -19,12 +21,14 @@
               <td>{{ resource.capacity }}</td>
               <td>{{ resource.location.address }}</td>
               <td>
-                <button class="btn btn-primary btn-sm" @click="allocateResource(resource)">
-                  Yönlendir
-                </button>
-                <button class="btn btn-outline-primary btn-sm mt-2" @click="showLocation(resource)">
-                  Konumu Gör
-                </button>
+                <div class="d-flex flex-column">
+                  <button class="btn btn-outline-success btn-sm mb-2" @click="allocateResource(resource)">
+                    Tahsis Et
+                  </button>
+                  <button class="btn btn-outline-primary btn-sm" @click="showLocation(resource)">
+                    Konumu Görüntüle
+                  </button>
+                </div>
               </td>
             </tr>
             </tbody>
@@ -38,25 +42,23 @@
 <script>
 import axios from 'axios';
 import eventBus from '@/eventBus';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import MapComponent from '@/components/AdminComponent/MapComponent.vue';
 
 export default {
+  components: {
+    MapComponent
+  },
   data() {
     return {
-      resources: [],
-      map: null
+      resources: []
     };
   },
   created() {
     this.fetchResources();
   },
-  mounted() {
-    this.initMap();
-  },
   methods: {
     fetchResources() {
-      axios.get('/api/equipment')
+      axios.get('http://localhost:8080/equipments')
           .then(response => {
             this.resources = response.data;
           })
@@ -65,35 +67,33 @@ export default {
           });
     },
     allocateResource(resource) {
-      axios.put(`/api/equipment/${resource.equipmentId}/allocate`, {
+      axios.put(`http://localhost:8080/equipments/${resource.equipmentId}`, {
         status: 'kullanımda'
       })
           .then(() => {
-            alert(`${resource.equipmentType} kaynağı yönlendirildi!`);
-            this.fetchResources(); // Tabloyu güncellemek için verileri tekrar yükle
+            alert(`${resource.equipmentType} kaynağı tahsis edildi!`);
+            this.fetchResources(); // Tabloyu güncellemek için verileri yenileyin
           })
           .catch(error => {
-            console.error('Kaynak yönlendirme hatası:', error);
+            console.error('Kaynak tahsisi başarısız oldu:', error);
           });
     },
     showLocation(resource) {
-      eventBus.emit('highlight-equipment-location', {
+      eventBus.emit('clear-all-markers'); // Önceki pingi temizlemek için olay yayınla
+      eventBus.emit('highlight-team-location', {
         coordinates: [resource.location.latitude, resource.location.longitude],
-        equipmentType: resource.equipmentType
+        teamName: resource.equipmentType
       });
-      if (this.map) {
-        const coordinates = [resource.location.latitude, resource.location.longitude];
-        const marker = L.marker(coordinates).addTo(this.map)
-            .bindPopup(`<b>${resource.equipmentType}</b><br>${resource.location.address}`)
-            .openPopup();
-        this.map.setView(coordinates, 15, { animate: true });
+      // Haritaya zoomlama işlemini gerçekleştir, fakat tekrar tekrar zoom yapılmaması için kontrol ekle
+      eventBus.emit('zoom-to-location', {
+        coordinates: [resource.location.latitude, resource.location.longitude],
+        zoomLevel: 15 // Özel bir zoom seviyesi ekledik
+      });
+      // Harita bileşeninin olduğu yere kaydırma işlemi
+      const mapElement = document.getElementById('map');
+      if (mapElement) {
+        mapElement.scrollIntoView({ behavior: 'smooth' });
       }
-    },
-    initMap() {
-      this.map = L.map('map').setView([39.9334, 32.8597], 10);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(this.map);
     }
   }
 };
@@ -101,56 +101,89 @@ export default {
 
 <style scoped>
 .card {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+  background-image: linear-gradient(145deg, #f3f4f7, #ffffff);
+}
+
+.card-elevated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-elevated:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-header {
+  background: linear-gradient(90deg, #4e73df, #224abe);
+  padding: 15px;
+  font-size: 1.25rem;
+}
+
+.stylish-table {
   border-radius: 10px;
-  background: #f8f9fa;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .table {
   margin-top: 20px;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
 }
 
-.thead-dark {
-  background-color: #343a40;
-  color: #fff;
+.table th, .table td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
-.table tbody tr {
-  transition: background-color 0.2s;
-}
-
-.table tbody tr:hover {
+.table-hover tbody tr:hover {
   background-color: #e9ecef;
 }
 
-.btn {
-  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.5);
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f8f9fc;
+}
+
+.table-warning {
+  background-color: #fff3cd;
+}
+
+.table-success {
+  background-color: #d4edda;
+}
+
+.table-danger {
+  background-color: #f8d7da;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  padding: 6px 12px;
   border-radius: 20px;
 }
 
-.table-responsive {
-  overflow-y: auto;
-  max-height: 400px;
+.btn-info:hover {
+  background-color: #138496;
+  border-color: #117a8b;
 }
 
-.table-responsive::-webkit-scrollbar {
-  width: 6px;
+.animated-button {
+  transition: transform 0.2s;
 }
 
-.table-responsive::-webkit-scrollbar-thumb {
-  background-color: #007bff;
-  border-radius: 10px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-  background-color: #e0e0e0;
-}
-
-#map {
-  height: 400px;
-  width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
+.animated-button:hover {
+  transform: scale(1.1);
 }
 </style>
+
+<MapComponent />

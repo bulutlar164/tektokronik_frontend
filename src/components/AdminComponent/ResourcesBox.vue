@@ -2,7 +2,7 @@
   <div class="col-lg-6 col-md-12 mb-4">
     <div class="card h-100 p-4 card-elevated">
       <div class="card-header bg-primary text-white text-center gradient-header">
-        <h5 class="card-title mb-0">Ekipmanların Durumları</h5>
+        <h5 class="card-title mb-0">Kaynakların Durumları</h5>
       </div>
       <div class="card-body">
         <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">
@@ -16,9 +16,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="resource in resources" :key="resource.equipmentId">
-              <td>{{ resource.equipmentType }}</td>
-              <td>{{ resource.capacity }}</td>
+            <tr v-for="resource in resources" :key="resource.resourceId">
+              <td>{{ resource.type }}</td>
+              <td>{{ resource.quantity }}</td>
               <td>{{ resource.location.address }}</td>
               <td>
                 <div class="d-flex flex-column">
@@ -57,8 +57,11 @@ export default {
     this.fetchResources();
   },
   methods: {
+    /**
+     * Kaynakları backend'den çeker ve bileşenin veri durumunu günceller.
+     */
     fetchResources() {
-      axios.get('http://localhost:8080/equipments')
+      axios.get('http://localhost:8080/resources')
           .then(response => {
             this.resources = response.data;
           })
@@ -66,30 +69,38 @@ export default {
             console.error('Kaynaklar yüklenemedi:', error);
           });
     },
+    /**
+     * Belirli bir kaynağı tahsis eder ve backend'de günceller.
+     * @param {Object} resource - Tahsis edilecek kaynak nesnesi
+     */
     allocateResource(resource) {
-      axios.put(`http://localhost:8080/equipments/${resource.equipmentId}`, {
-        status: 'kullanımda'
+      axios.put(`http://localhost:8080/resources/${resource.resourceId}`, {
+        ...resource,
+        status: 'kullanımda' // Kaynağın durumunu güncelleyin
       })
           .then(() => {
-            alert(`${resource.equipmentType} kaynağı tahsis edildi!`);
+            alert(`${resource.type} kaynağı tahsis edildi!`);
             this.fetchResources(); // Tabloyu güncellemek için verileri yenileyin
           })
           .catch(error => {
             console.error('Kaynak tahsisi başarısız oldu:', error);
           });
     },
+    /**
+     * Kaynağın konumunu haritada gösterir ve haritaya odaklanır.
+     * @param {Object} resource - Konumu gösterilecek kaynak nesnesi
+     */
     showLocation(resource) {
-      eventBus.emit('clear-all-markers'); // Önceki pingi temizlemek için olay yayınla
+      eventBus.emit('clear-all-markers'); // Önceki işaretleyicileri temizle
       eventBus.emit('highlight-team-location', {
         coordinates: [resource.location.latitude, resource.location.longitude],
-        teamName: resource.equipmentType
+        teamName: resource.type
       });
-      // Haritaya zoomlama işlemini gerçekleştir, fakat tekrar tekrar zoom yapılmaması için kontrol ekle
       eventBus.emit('zoom-to-location', {
         coordinates: [resource.location.latitude, resource.location.longitude],
-        zoomLevel: 15 // Özel bir zoom seviyesi ekledik
+        zoomLevel: 15 // Özel bir zoom seviyesi
       });
-      // Harita bileşeninin olduğu yere kaydırma işlemi
+      // Harita bileşenine kaydırma işlemi
       const mapElement = document.getElementById('map');
       if (mapElement) {
         mapElement.scrollIntoView({ behavior: 'smooth' });
@@ -186,4 +197,5 @@ export default {
 }
 </style>
 
+<!-- Harita bileşenini sayfaya ekleyin -->
 <MapComponent />
