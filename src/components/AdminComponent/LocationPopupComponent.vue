@@ -82,6 +82,13 @@ export default {
       resources: [], // Eklenen kaynakları yönetmek için yeni durum
       equipmentAvailability: "Bilinmiyor", // Varsayılan değer
       gatheringPoint: "Bilinmiyor", // Varsayılan değer
+      gatheringPoints: [ // Toplanma alanları listesi
+        "Kızılay Toplanma Alanı",
+        "Yenimahalle Toplanma Alanı",
+        "Çankaya Toplanma Alanı",
+        "Söğütözü Toplanma Alanı",
+        "Bahçelievler Toplanma Alanı"
+      ]
     };
   },
   methods: {
@@ -110,8 +117,15 @@ export default {
           preConfirm: () => {
             // Form doğrulaması
             const selectedTeam = Swal.getPopup().querySelector('#teamSelection').value;
+            const selectedGatheringPoint = Swal.getPopup().querySelector('#gatheringPointSelection').value;
+
             if (!selectedTeam) {
               Swal.showValidationMessage('Lütfen bir takım seçin');
+              return false;
+            }
+
+            if (!selectedGatheringPoint) {
+              Swal.showValidationMessage('Lütfen bir toplanma alanı seçin');
               return false;
             }
 
@@ -137,6 +151,7 @@ export default {
 
             return {
               selectedTeam,
+              selectedGatheringPoint,
               equipments,
               resources,
             };
@@ -146,6 +161,7 @@ export default {
             const postData = {
               reportId: this.report.reportId,
               teamId: result.value.selectedTeam,
+              gatheringPoint: result.value.selectedGatheringPoint, // Toplanma alanı ekleniyor
               equipments: result.value.equipments,
               resources: result.value.resources,
             };
@@ -237,6 +253,11 @@ export default {
           .map(team => `<option value="${team.teamId}">${team.teamName}</option>`)
           .join('');
 
+      // Toplanma alanları için seçenekler oluşturuluyor
+      const gatheringPointsOptions = this.gatheringPoints
+          .map(point => `<option value="${point}">${point}</option>`)
+          .join('');
+
       return `
         <form id="resourceEquipmentForm">
           <div class="container-fluid">
@@ -285,6 +306,26 @@ export default {
                       <!-- Dinamik olarak eklenen kaynaklar burada görünecek -->
                     </div>
                     <button type="button" id="addResourceButton" class="btn btn-outline-success mt-2 w-100">Kaynak Ekle</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Toplanma Alanları Kartı -->
+              <div class="col-md-12 mb-3">
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white">
+                    Toplanma Alanı
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="gatheringPointSelection" class="form-label">Toplanma Alanı Seçin</label>
+                      <select id="gatheringPointSelection" class="form-select" required>
+                        <option disabled selected value="">Bir toplanma alanı seçin</option>
+                        ${gatheringPointsOptions}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
