@@ -9,13 +9,13 @@
 
       <!-- Toggler for mobile -->
       <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -25,41 +25,32 @@
         <!-- Navbar Links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item" v-for="(link, index) in links" :key="index">
-            <a class="nav-link active nav-link-text" :href="link.url">{{ link.label }}</a>
-          </li>
-          <!-- İstatistikler Linki -->
-          <li class="nav-item">
-            <a class="nav-link active nav-link-text" href="/StatisticsPage">İstatistikler</a>
+            <a class="nav-link active nav-link-text" :href="link.url" @click="closeNavbar">{{ link.label }}</a>
           </li>
 
-          <!-- Optional: Dropdown for admin-specific actions -->
-          <li class="nav-item dropdown">
-            <a
-                class="nav-link dropdown-toggle active nav-link-text"
-                href="#"
-                id="adminDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-            >
-              Admin
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
-              <li><a class="dropdown-item" href="#">Settings</a></li>
-              <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item" href="#">Logout</a></li>
-            </ul>
+          <!-- İstatistikler Link -->
+          <li class="nav-item">
+            <a class="nav-link active nav-link-text" href="/StatisticsPage" @click="closeNavbar">İstatistikler</a>
+          </li>
+
+          <!-- AI Link -->
+          <li class="nav-item">
+            <a class="nav-link active nav-link-text" href="/Ai" @click="closeNavbar">AI</a>
+          </li>
+
+          <!-- Admin Link -->
+          <li class="nav-item">
+            <a class="nav-link active nav-link-text" href="/admin" @click="closeNavbar">Admin</a>
           </li>
         </ul>
 
         <!-- Search bar -->
         <form class="d-flex me-2">
           <input
-              class="form-control search-input me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
+            class="form-control search-input me-2"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
           />
           <button class="btn btn-outline-warning" type="submit">Search</button>
         </form>
@@ -68,24 +59,23 @@
         <ul class="navbar-nav ms-3">
           <li class="nav-item dropdown">
             <a
-                class="nav-link dropdown-toggle d-flex align-items-center text-light"
-                href="#"
-                id="profileDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+              class="nav-link dropdown-toggle d-flex align-items-center text-light"
+              href="#"
+              id="profileDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
               <img
-                  src="https://via.placeholder.com/30"
-                  class="rounded-circle me-2"
-                  alt="User"
+                src="https://via.placeholder.com/30"
+                class="rounded-circle me-2"
+                alt="User"
               />
               <span>Admin</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end">
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
               <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="#">Settings</a></li>
-              <li><hr class="dropdown-divider" /></li>
               <li><a class="dropdown-item" href="#">Logout</a></li>
             </ul>
           </li>
@@ -109,6 +99,16 @@ export default {
       validator: (value) => {
         return value.every((link) => link.label && link.url);
       },
+    },
+  },
+  methods: {
+    closeNavbar() {
+      // Close the navbar when a link is clicked
+      const collapseElement = document.getElementById("navbarSupportedContent");
+      if (collapseElement) {
+        const bsCollapse = new bootstrap.Collapse(collapseElement);
+        bsCollapse.hide();
+      }
     },
   },
 };

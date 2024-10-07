@@ -166,6 +166,8 @@ export default {
   flex-direction: row; /* İlk başta yan yana yerleştir */
   justify-content: space-between; /* Boşlukları eşit dağıt */
   height: calc(100vh - 60px); /* Navbar'ı hesaba kat */
+  gap: 20px; /* Aralarındaki boşluk */
+  padding: 20px;
 }
 
 /* Sol taraf: Resim yükleme alanı */
@@ -282,46 +284,88 @@ export default {
   }
 }
 
-/* Sağ taraf: Analiz sonuçları */
+/* Sağ taraf: Analiz sonuçları alanı */
 .right-side {
-  width: 48%; /* Genişlik sınırı */
-  background-color: #ded260;
+  width: 48%;
+  background-color: #fff;
   padding: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Üstten hizalama */
-  overflow-y: auto; /* Dikey kaydırma çubuğu ekle */
+  box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
 .result-box {
-  width: 100%;
-  overflow-x: auto; /* Yatay kaydırma çubuğu ekle */
+  max-height: 70vh;
+  overflow-y: auto; /* Dikey kaydırma */
 }
 
 .result-table {
   width: 100%;
-  border-collapse: collapse; /* Kenarları birleştir */
-  text-align: left; /* Yazı sola yasla */
+  border-collapse: collapse;
 }
 
 .result-table th,
 .result-table td {
   border: 1px solid #ddd;
   padding: 8px;
+  text-align: center; /* Hücre içi metni ortala */
 }
 
 .result-table th {
-  background-color: #f2f2f2;
+  background-color: #ff6f61;
+  color: white;
 }
 
-.result-table tr:hover {
-  background-color: #f5f5f5; /* Üzerine gelindiğinde arka plan rengi değişimi */
+/* Media Queries */
+@media (max-width: 768px) {
+  .content-section {
+    flex-direction: column; /* Mobil cihazlar için yan yana yerine alt alta sıralar */
+    height: auto; /* Yükseklik ayarı kaldırılır */
+  }
+
+  .left-side,
+  .right-side {
+    width: 100%; /* Her iki bölme de %100 genişlik alır */
+    margin-bottom: 20px; /* Altına boşluk ekle */
+  }
+
+  .preview-item {
+    width: 80px; /* Küçük ekranlarda önizleme öğeleri küçültülür */
+    height: 80px;
+  }
+
+  .upload-section {
+    flex-direction: column; /* Dikey hizalama sağlanır */
+  }
+
+  .custom-file-upload,
+  .upload-btn {
+    width: 100%; /* Butonlar tam genişlikte olur */
+    text-align: center;
+    margin-bottom: 10px;
+  }
 }
 
-/* Vurgulama */
-.highlighted {
-  background-color: rgb(58, 173, 40);
-  animation: highlight 0.5s ease-in-out;
+@media (max-width: 480px) {
+  .title {
+    font-size: 2em; /* Başlık boyutu daha da küçültülür */
+  }
+
+  .description {
+    font-size: 1em; /* Açıklama yazı boyutu küçültülür */
+  }
+
+  .preview-item {
+    width: 60px; /* Daha küçük ekranlar için daha da küçültülür */
+    height: 60px;
+  }
+
+  .result-table th,
+  .result-table td {
+    padding: 6px; /* Tablo hücrelerinin iç boşlukları daraltılır */
+  }
+
+  .custom-file-upload,
+  .upload-btn {
+    padding: 10px; /* Butonların iç boşlukları küçültülür */
+  }
 }
 </style>

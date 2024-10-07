@@ -5,33 +5,48 @@
         <h5 class="card-title mb-0">Anlık Yönlendirnlendirme Durumları</h5>
       </div>
       <div class="card-body">
-        <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">
+        <div class="table-responsive stylish-table">
           <table class="table table-hover table-striped table-bordered">
             <thead class="thead-dark">
-            <tr>
-              <th>Nereye Yönlendirildi</th>
-              <th>Nereden Yönlendirildi</th>
-              <th>Mevcut Kışi Sayısı</th>
-              <th>Tahmini Yönlendirilen Kışi Sayısı</th>
-              <th>Durum</th>
-              <th>Yönlendirîlme Zamanı</th>
-              <th>İşlem</th>
-            </tr>
+              <tr>
+                <th>Nereye Yönlendirildi</th>
+                <th>Nereden Yönlendirildi</th>
+                <th>Mevcut Kişi Sayısı</th>
+                <th>Tahmini Yönlendirilen Kişi Sayısı</th>
+                <th>Durum</th>
+                <th>Yönlendirilme Zamanı</th>
+                <th>İşlem</th>
+              </tr>
             </thead>
             <tbody>
-            <tr v-for="guidance in regionalGuidance" :key="guidance.guidanceId" :class="getStatusClass(guidance.status)">
-              <td>{{ guidance.assemblyPoint.name}}</td>
-              <td>{{ guidance.crowdDetection && guidance.crowdDetection.location ? guidance.crowdDetection.location.address: 'Veri Yok' }}</td>
-              <td>{{ guidance.crowdDetection ? guidance.crowdDetection.estimatedCount : 'Veri Yok' }}</td>
-              <td>{{ guidance.crowdDetection ? guidance.crowdDetection.estimatedCount : 'Veri Yok' }}</td>
-              <td>{{ guidance.status }}</td>
-              <td>{{ guidance.assignedAt }}</td>
-              <td>
-                <button class="btn btn-info btn-sm animated-button" @click="viewGuidanceDetails(guidance)">
-                  Detayları Gör
-                </button>
-              </td>
-            </tr>
+              <tr
+                v-for="guidance in regionalGuidance"
+                :key="guidance.guidanceId"
+                :class="getStatusClass(guidance.status)"
+              >
+                <td>{{ guidance.assemblyPoint.name }}</td>
+                <td>
+                  {{ guidance.crowdDetection && guidance.crowdDetection.location
+                    ? guidance.crowdDetection.location.address
+                    : 'Veri Yok' }}
+                </td>
+                <td>
+                  {{ guidance.crowdDetection ? guidance.crowdDetection.estimatedCount : 'Veri Yok' }}
+                </td>
+                <td>
+                  {{ guidance.crowdDetection ? guidance.crowdDetection.estimatedCount : 'Veri Yok' }}
+                </td>
+                <td>{{ guidance.status }}</td>
+                <td>{{ guidance.assignedAt }}</td>
+                <td>
+                  <button
+                    class="btn btn-info btn-sm animated-button"
+                    @click="viewGuidanceDetails(guidance)"
+                  >
+                    Detayları Gör
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -55,16 +70,20 @@ export default {
   },
   methods: {
     fetchRegionalGuidance() {
-      axios.get('http://localhost:8080/regional-guidances')
-          .then(response => {
-            this.regionalGuidance = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching regional guidance data: ", error);
-          });
+      axios
+        .get('http://localhost:8080/regional-guidances')
+        .then(response => {
+          this.regionalGuidance = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching regional guidance data: ', error);
+        });
     },
     viewGuidanceDetails(guidance) {
-      const crowdDetectionDetails = guidance.crowdDetection ? `<strong>Crowd Detection ID:</strong> ${guidance.crowdDetection.crowdDetectionId}<br><strong>Lokasyon:</strong> ${guidance.crowdDetection.location ? guidance.crowdDetection.location.address + ' - ' + guidance.crowdDetection.location.region : 'Veri Yok'}<br><strong>Tahmini Kışi Sayısı:</strong> ${guidance.crowdDetection.estimatedCount}` : 'Crowd Detection Bilgisi Mevcut Değil';
+      const crowdDetectionDetails =
+        guidance.crowdDetection
+          ? `<strong>Crowd Detection ID:</strong> ${guidance.crowdDetection.crowdDetectionId}<br><strong>Lokasyon:</strong> ${guidance.crowdDetection.location ? guidance.crowdDetection.location.address + ' - ' + guidance.crowdDetection.location.region : 'Veri Yok'}<br><strong>Tahmini Kişi Sayısı:</strong> ${guidance.crowdDetection.estimatedCount}`
+          : 'Crowd Detection Bilgisi Mevcut Değil';
       Swal.fire({
         title: 'Yönlendirme Detayları',
         html: `<strong>Guidance ID:</strong> ${guidance.guidanceId}<br>${crowdDetectionDetails}<br><strong>Durum:</strong> ${guidance.status}<br><strong>Atama Zamanı:</strong> ${guidance.assignedAt}`,
@@ -117,6 +136,12 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.table-responsive {
+  max-height: 400px; /* Ensure the table can scroll if needed */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: auto; /* Enable horizontal scrolling */
+}
+
 .table {
   margin-top: 20px;
   border-collapse: separate;
@@ -124,13 +149,14 @@ export default {
   width: 100%;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   vertical-align: middle;
   text-align: center;
-  padding: 15px;
+  padding: 10px; /* Reduced padding for better fit */
   border: 1px solid #dee2e6;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Base font size */
 }
 
 .table-hover tbody tr:hover {
@@ -172,5 +198,19 @@ export default {
 
 .animated-button:hover {
   transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 0.8rem; /* Smaller font size on smaller screens */
+    padding: 6px; /* Reduced padding for better fit */
+    white-space: normal; /* Allow wrapping of text */
+  }
+
+  .card-header h5 {
+    font-size: 1rem; /* Adjust card title size */
+  }
 }
 </style>

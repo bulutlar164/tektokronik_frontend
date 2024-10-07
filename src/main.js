@@ -3,6 +3,7 @@ import App from './App.vue';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import { createRouter, createWebHistory } from 'vue-router';
 

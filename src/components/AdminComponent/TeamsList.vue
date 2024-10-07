@@ -3,12 +3,12 @@
     <div class="card-header bg-primary text-white text-center gradient-header">
       <h5 class="card-title mb-0">Ekipler</h5>
     </div>
-    <div class="teams-container"> <!-- Scroll ve boyut için container -->
+    <div class="teams-container">
       <div class="teams-grid">
         <div class="team-card" v-for="team in teams" :key="team.id">
           <div
-              class="card team-card-content"
-              :class="{
+            class="card team-card-content"
+            :class="{
               'available-card': team.status === 'uygun',
               'busy-card':
                 team.status === 'meşgul' || team.status === 'müsait değil'
@@ -18,33 +18,29 @@
               <h6 class="card-title team-name">
                 <i class="fas fa-users mr-2" style="color: #007bff;"></i>
                 {{ team.teamName }}
-                <!-- Eğer takım status 'uygun' ise onay işareti ekliyoruz -->
                 <span v-if="team.status === 'uygun'" class="available-icon">
                   <i
-                      class="fas fa-check-circle available-icon-inner"
-                      style="color: green; margin-left: 8px;"
+                    class="fas fa-check-circle available-icon-inner"
+                    style="color: green; margin-left: 8px;"
                   ></i>
                 </span>
               </h6>
               <p class="card-text">
-                <span class="label">Görev Yeri:</span> {{ team.assignedRegion
-                }}<br />
-                <span class="label">Toplam Kapasite:</span> {{ team.capacity
-                }}<br />
+                <span class="label">Görev Yeri:</span> {{ team.assignedRegion }}<br />
+                <span class="label">Toplam Kapasite:</span> {{ team.capacity }}<br />
                 <span class="label">Uygunluk:</span> {{ team.status }}
               </p>
             </div>
-            <!-- Kartın altına butonları yerleştiriyoruz -->
             <div class="card-footer">
               <button
-                  class="btn btn-outline-primary btn-block"
-                  @click="showTeamLocation(team)"
+                class="btn btn-outline-primary btn-block"
+                @click="showTeamLocation(team)"
               >
                 Konumu Görüntüle
               </button>
               <button
-                  class="btn btn-outline-success btn-block mt-2"
-                  @click="assignTeam(team)"
+                class="btn btn-outline-success btn-block mt-2"
+                @click="assignTeam(team)"
               >
                 Yönlendir
               </button>
@@ -58,41 +54,40 @@
 
 <script>
 import axios from 'axios';
-import eventBus from '@/eventBus'; // EventBus ile harita iletişimi için
+import eventBus from '@/eventBus';
 
 export default {
   name: 'TeamsList',
   data() {
     return {
-      teams: [], // Veriler backend'den yüklenecek
+      teams: [],
     };
   },
   mounted() {
-    this.fetchTeams(); // Sayfa yüklendiğinde ekipleri backend'den çek
+    this.fetchTeams();
   },
   methods: {
     fetchTeams() {
       axios
-          .get('http://localhost:8080/api/emergency-teams')
-          .then((response) => {
-            this.teams = response.data.map((team) => ({
-              id: team.teamId, // Konsolda 'teamId' anahtarı kullanılıyor
-              teamName: team.teamName,
-              capacity: team.capacity,
-              status: team.status, // 'uygun' veya başka değerler olabilir
-              assignedRegion: team.assignedRegion,
-              currentLocation: [
-                team.currentLocation.latitude, // Enlem
-                team.currentLocation.longitude, // Boylam
-              ],
-            }));
-          })
-          .catch((error) => {
-            console.error('Ekipler yüklenirken bir hata oluştu:', error);
-          });
+        .get('http://localhost:8080/api/emergency-teams')
+        .then((response) => {
+          this.teams = response.data.map((team) => ({
+            id: team.teamId,
+            teamName: team.teamName,
+            capacity: team.capacity,
+            status: team.status,
+            assignedRegion: team.assignedRegion,
+            currentLocation: [
+              team.currentLocation.latitude,
+              team.currentLocation.longitude,
+            ],
+          }));
+        })
+        .catch((error) => {
+          console.error('Ekipler yüklenirken bir hata oluştu:', error);
+        });
     },
     showTeamLocation(team) {
-      // EventBus ile MapComponent'e ekibin ismini ve konumunu gönderiyoruz
       eventBus.emit('highlight-team-location', {
         coordinates: team.currentLocation,
         teamName: team.teamName,
@@ -107,33 +102,29 @@ export default {
 
 <style scoped>
 .main-card {
-  /* İsteğe bağlı: Kartın maksimum yüksekliğini belirleyin */
-  max-height: 80vh; /* Gerekirse bu değeri ayarlayın */
-  /* İsteğe bağlı: Genişlik veya diğer boyut ayarları */
-  /* width: 90%; */
-  /* margin: auto; */
+  max-height: 80vh;
 }
 
 .teams-container {
   background-color: #fff;
   padding: 15px;
   border-radius: 8px;
-  height: 32vh; /* Yüksekliği azalttık */
-  overflow-y: auto; /* İçerik taşarsa scroll bar ekler */
-  scrollbar-width: thin; /* Scroll bar genişliğini ince yapar */
-  scrollbar-color: #007bff #e0e0e0; /* Scroll barın rengi */
+  height: 32vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #007bff #e0e0e0;
 }
 
 .teams-grid {
   display: flex;
   flex-wrap: wrap;
-  height: 28vh; /* Yüksekliği azalttık */
-  gap: 15px; /* Kartlar arası boşluk */
+  height: auto; /* Change to auto for responsiveness */
+  gap: 15px;
 }
 
 .team-card {
-  flex: 1 0 calc(33.333% - 10px); /* 3 sütun olacak şekilde genişlik */
-  max-width: calc(33.333% - 10px); /* Kart genişliği sabitlendi */
+  flex: 1 0 calc(33.333% - 10px); /* Default: 3 columns */
+  max-width: calc(33.333% - 10px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -142,8 +133,8 @@ export default {
 .team-card-content {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Butonun en alta yerleşmesi için */
-  height: 100%; /* Kartın tam yüksekliği */
+  justify-content: space-between;
+  height: 100%;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   background-color: #fff;
@@ -156,11 +147,11 @@ export default {
 }
 
 .available-card {
-  box-shadow: 0 0 10px rgba(47, 166, 30, 0.56); /* "uygun" durumunda yeşil gölge */
+  box-shadow: 0 0 10px rgba(47, 166, 30, 0.56);
 }
 
 .busy-card {
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* "meşgul" veya "müsait değil" durumunda kırmızı gölge */
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
 
 .card-body {
@@ -168,32 +159,32 @@ export default {
 }
 
 .team-name {
-  font-size: 1.2rem; /* Ekip ismini daha belirgin hale getiriyoruz */
+  font-size: 1.2rem;
   font-weight: bold;
   color: #333;
 }
 
 .card-text {
-  font-size: 0.9rem; /* İçerik yazı boyutu */
+  font-size: 0.9rem;
   color: #555;
 }
 
 .label {
   font-weight: bold;
-  color: #007bff; /* Öne çıkarmak için mavi ton */
+  color: #007bff;
 }
 
 .card-footer {
   padding: 10px 15px;
-  margin-top: auto; /* Butonun her zaman kartın en altında yer alması için */
+  margin-top: auto;
 }
 
 .card-footer button {
-  width: 100%; /* Butonları aynı boyutta yapıyoruz */
+  width: 100%;
 }
 
 .btn-block {
-  width: 100%; /* Butonların tam genişlikte olmasını sağlıyoruz */
+  width: 100%;
 }
 
 .btn-outline-primary,
@@ -228,28 +219,35 @@ export default {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .team-card {
-    flex: 1 0 100%; /* Daha küçük ekranlarda tek sütun */
-    max-width: 100%;
+    flex: 1 0 calc(50% - 10px); /* 2 columns for medium screens */
+    max-width: calc(50% - 10px);
   }
 }
 
-/* Scrollbar stili */
+@media (max-width: 768px) {
+  .team-card {
+    flex: 1 0 calc(100% - 10px); /* 1 column for small screens */
+    max-width: calc(100% - 10px);
+  }
+}
+
+/* Scrollbar style */
 .teams-container::-webkit-scrollbar {
-  width: 6px; /* İnce bir scrollbar genişliği */
+  width: 6px;
 }
 
 .teams-container::-webkit-scrollbar-thumb {
-  background-color: #007bff; /* Scrollbar rengi */
+  background-color: #007bff;
   border-radius: 10px;
 }
 
 .teams-container::-webkit-scrollbar-track {
-  background-color: #e0e0e0; /* Scrollbar arka planı */
+  background-color: #e0e0e0;
 }
 
-/* Başlık için stil */
+/* Header style */
 .gradient-header {
   background: linear-gradient(90deg, #4e73df, #224abe);
   padding: 15px;

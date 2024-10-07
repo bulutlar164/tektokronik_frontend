@@ -8,29 +8,29 @@
         <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">
           <table class="table table-hover table-striped table-bordered">
             <thead class="thead-dark">
-            <tr>
-              <th>Kaynak Türü</th>
-              <th>Mevcut Miktar</th>
-              <th>Konum</th>
-              <th>İşlem</th>
-            </tr>
+              <tr>
+                <th>Kaynak Türü</th>
+                <th>Mevcut Miktar</th>
+                <th>Konum</th>
+                <th>İşlem</th>
+              </tr>
             </thead>
             <tbody>
-            <tr v-for="resource in resources" :key="resource.equipmentId">
-              <td>{{ resource.equipmentType }}</td>
-              <td>{{ resource.capacity }}</td>
-              <td>{{ resource.location.address }}</td>
-              <td>
-                <div class="d-flex flex-column">
-                  <button class="btn btn-outline-success btn-sm mb-2" @click="allocateResource(resource)">
-                    Tahsis Et
-                  </button>
-                  <button class="btn btn-outline-primary btn-sm" @click="showLocation(resource)">
-                    Konumu Görüntüle
-                  </button>
-                </div>
-              </td>
-            </tr>
+              <tr v-for="resource in resources" :key="resource.equipmentId">
+                <td>{{ resource.equipmentType }}</td>
+                <td>{{ resource.capacity }}</td>
+                <td>{{ resource.location.address }}</td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <button class="btn btn-outline-success btn-sm mb-2" @click="allocateResource(resource)">
+                      Tahsis Et
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" @click="showLocation(resource)">
+                      Konumu Görüntüle
+                    </button>
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -59,24 +59,24 @@ export default {
   methods: {
     fetchResources() {
       axios.get('http://localhost:8080/equipments')
-          .then(response => {
-            this.resources = response.data;
-          })
-          .catch(error => {
-            console.error('Kaynaklar yüklenemedi:', error);
-          });
+        .then(response => {
+          this.resources = response.data;
+        })
+        .catch(error => {
+          console.error('Kaynaklar yüklenemedi:', error);
+        });
     },
     allocateResource(resource) {
       axios.put(`http://localhost:8080/equipments/${resource.equipmentId}`, {
         status: 'kullanımda'
       })
-          .then(() => {
-            alert(`${resource.equipmentType} kaynağı tahsis edildi!`);
-            this.fetchResources(); // Tabloyu güncellemek için verileri yenileyin
-          })
-          .catch(error => {
-            console.error('Kaynak tahsisi başarısız oldu:', error);
-          });
+        .then(() => {
+          alert(`${resource.equipmentType} kaynağı tahsis edildi!`);
+          this.fetchResources(); // Tabloyu güncellemek için verileri yenileyin
+        })
+        .catch(error => {
+          console.error('Kaynak tahsisi başarısız oldu:', error);
+        });
     },
     showLocation(resource) {
       eventBus.emit('clear-all-markers'); // Önceki pingi temizlemek için olay yayınla
@@ -119,7 +119,7 @@ export default {
 .gradient-header {
   background: linear-gradient(90deg, #4e73df, #224abe);
   padding: 15px;
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* Responsive yazı boyutu için vw birimi kullanılabilir */
 }
 
 .stylish-table {
@@ -183,6 +183,38 @@ export default {
 
 .animated-button:hover {
   transform: scale(1.1);
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .gradient-header {
+    font-size: 1rem; /* Yazı boyutunu küçük ekranlar için azalt */
+  }
+
+  .table th, .table td {
+    font-size: 0.8rem; /* Daha küçük yazı boyutu */
+  }
+
+  .btn {
+    font-size: 0.8rem; /* Buton yazı boyutunu küçük ekranlar için azalt */
+    padding: 4px 8px; /* Buton padding'lerini küçült */
+  }
+}
+
+@media (max-width: 576px) {
+  .table th, .table td {
+    display: block; /* Küçük ekranlarda hücreleri blok yap */
+    width: 100%; /* Hücre genişliğini tam yap */
+  }
+
+  .table td {
+    text-align: left; /* Sol tarafa hizala */
+    padding: 8px; /* Daha küçük padding */
+  }
+
+  .btn {
+    width: 100%; /* Butonları tam genişlikte yap */
+  }
 }
 </style>
 

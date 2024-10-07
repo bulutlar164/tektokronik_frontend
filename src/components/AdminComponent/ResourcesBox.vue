@@ -8,29 +8,29 @@
         <div class="table-responsive stylish-table" style="max-height: 400px; overflow-y: auto;">
           <table class="table table-hover table-striped table-bordered">
             <thead class="thead-dark">
-            <tr>
-              <th>Kaynak Türü</th>
-              <th>Mevcut Miktar</th>
-              <th>Konum</th>
-              <th>İşlem</th>
-            </tr>
+              <tr>
+                <th>Kaynak Türü</th>
+                <th>Mevcut Miktar</th>
+                <th>Konum</th>
+                <th>İşlem</th>
+              </tr>
             </thead>
             <tbody>
-            <tr v-for="resource in resources" :key="resource.resourceId">
-              <td>{{ resource.type }}</td>
-              <td>{{ resource.quantity }}</td>
-              <td>{{ resource.location.address }}</td>
-              <td>
-                <div class="d-flex flex-column">
-                  <button class="btn btn-outline-success btn-sm mb-2" @click="allocateResource(resource)">
-                    Tahsis Et
-                  </button>
-                  <button class="btn btn-outline-primary btn-sm" @click="showLocation(resource)">
-                    Konumu Görüntüle
-                  </button>
-                </div>
-              </td>
-            </tr>
+              <tr v-for="resource in resources" :key="resource.resourceId">
+                <td>{{ resource.type }}</td>
+                <td>{{ resource.quantity }}</td>
+                <td>{{ resource.location.address }}</td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <button class="btn btn-outline-success btn-sm mb-2" @click="allocateResource(resource)">
+                      Tahsis Et
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" @click="showLocation(resource)">
+                      Konumu Görüntüle
+                    </button>
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -57,9 +57,6 @@ export default {
     this.fetchResources();
   },
   methods: {
-    /**
-     * Kaynakları backend'den çeker ve bileşenin veri durumunu günceller.
-     */
     fetchResources() {
       axios.get('http://localhost:8080/resources')
           .then(response => {
@@ -69,38 +66,29 @@ export default {
             console.error('Kaynaklar yüklenemedi:', error);
           });
     },
-    /**
-     * Belirli bir kaynağı tahsis eder ve backend'de günceller.
-     * @param {Object} resource - Tahsis edilecek kaynak nesnesi
-     */
     allocateResource(resource) {
       axios.put(`http://localhost:8080/resources/${resource.resourceId}`, {
         ...resource,
-        status: 'kullanımda' // Kaynağın durumunu güncelleyin
+        status: 'kullanımda'
       })
           .then(() => {
             alert(`${resource.type} kaynağı tahsis edildi!`);
-            this.fetchResources(); // Tabloyu güncellemek için verileri yenileyin
+            this.fetchResources();
           })
           .catch(error => {
             console.error('Kaynak tahsisi başarısız oldu:', error);
           });
     },
-    /**
-     * Kaynağın konumunu haritada gösterir ve haritaya odaklanır.
-     * @param {Object} resource - Konumu gösterilecek kaynak nesnesi
-     */
     showLocation(resource) {
-      eventBus.emit('clear-all-markers'); // Önceki işaretleyicileri temizle
+      eventBus.emit('clear-all-markers');
       eventBus.emit('highlight-team-location', {
         coordinates: [resource.location.latitude, resource.location.longitude],
         teamName: resource.type
       });
       eventBus.emit('zoom-to-location', {
         coordinates: [resource.location.latitude, resource.location.longitude],
-        zoomLevel: 15 // Özel bir zoom seviyesi
+        zoomLevel: 15
       });
-      // Harita bileşenine kaydırma işlemi
       const mapElement = document.getElementById('map');
       if (mapElement) {
         mapElement.scrollIntoView({ behavior: 'smooth' });
@@ -133,12 +121,7 @@ export default {
   font-size: 1.25rem;
 }
 
-.stylish-table {
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
+/* Responsive table styling */
 .table {
   margin-top: 20px;
   border-collapse: separate;
@@ -151,7 +134,6 @@ export default {
   text-align: center;
   padding: 15px;
   border: 1px solid #dee2e6;
-  white-space: nowrap;
   font-size: 0.9rem;
 }
 
@@ -163,16 +145,9 @@ export default {
   background-color: #f8f9fc;
 }
 
-.table-warning {
-  background-color: #fff3cd;
-}
-
-.table-success {
-  background-color: #d4edda;
-}
-
-.table-danger {
-  background-color: #f8d7da;
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .btn-info {
@@ -195,7 +170,36 @@ export default {
 .animated-button:hover {
   transform: scale(1.1);
 }
-</style>
 
-<!-- Harita bileşenini sayfaya ekleyin -->
-<MapComponent />
+@media (max-width: 768px) {
+  .card {
+    padding: 10px;
+  }
+
+  .table th, .table td {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .card {
+    padding: 8px;
+  }
+
+  .table th, .table td {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .btn-sm {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+  }
+}
+</style>
