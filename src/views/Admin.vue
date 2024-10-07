@@ -6,12 +6,12 @@
     <!-- Main Content Container with flexbox -->
     <div class="content-container row">
       <!-- Map Column -->
-      <div class="map-column col-lg-7 col-md-12"> <!-- Genişlik küçültüldü -->
+      <div class="map-column col-lg-7 col-md-12">
         <MapComponent />
       </div>
 
       <!-- Dashboard Section (Incidents and Teams) -->
-      <div class="dashboard-column col-lg-5 col-md-12"> <!-- Dashboard kısmı genişletildi -->
+      <div class="dashboard-column col-lg-5 col-md-12">
         <IncidentsList />
         <TeamsList />
       </div>
@@ -19,9 +19,9 @@
 
     <!-- Information Boxes with Functional Buttons -->
     <div class="boxes row mt-4">
-      <CrowdDetectionsBox />
-      <ResourcesBox />
-      <DamageReportsBox />
+      <CrowdDetectionsBox class="col-12 col-md-4" />
+      <ResourcesBox class="col-12 col-md-4" />
+      <DamageReportsBox class="col-12 col-md-4" />
     </div>
   </div>
 </template>
@@ -60,38 +60,35 @@ export default {
 .content-container {
   display: flex;
   width: 100%;
-  padding: 20px 20px 0px 20px;
+  padding: 20px;
   margin: 0 auto;
 }
 
-.boxes{
+.boxes {
   display: flex;
   justify-content: space-between;
   margin: 0 auto;
   padding: 0 20px;
+  flex-wrap: wrap; /* Kutuların sarmalaması için */
 }
 
 .map-column {
-  height: 76vh;
-  flex-basis: 60%; /* Genişlik küçültüldü */
+  height: 76vh; /* Harita yüksekliği */
+  flex-basis: 60%; /* Genişlik ayarı */
   display: flex;
   align-items: stretch;
   padding-right: 10px;
 }
 
 .dashboard-column {
-  height: 68vh;
-  flex-basis: 40%; /* Dashboard genişliği artırıldı */
+  height: auto; /* Dashboard otomatik yükseklik alacak */
+  flex-basis: 40%; /* Genişlik ayarı */
   padding-left: 10px;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-}
-
-.col-lg-6 {
-  width: 50%;
 }
 
 /* Responsive adjustments */
@@ -101,7 +98,26 @@ export default {
   }
 
   .map-column {
-    height: 400px; /* Fixed height for smaller screens */
+    height: 50vh; /* Küçük ekranlar için yükseklik */
+    padding-right: 0; /* Sağdan boşluk kaldırıldı */
+  }
+
+  .dashboard-column {
+    padding-left: 0; /* Soldan boşluk kaldırıldı */
+    height: auto; /* Dashboard yüksekliği otomatik */
+  }
+
+  .boxes {
+    flex-direction: column; /* Bilgi kutularını dikey yerleştir */
+  }
+
+  .boxes > * {
+    width: 100%; /* Her kutunun genişliğini %100 yap */
+    margin-bottom: 10px; /* Kutular arası boşluk ekleyin */
+  }
+
+  .boxes > :last-child {
+    margin-bottom: 0; /* Son kutunun alt boşluğunu kaldırın */
   }
 }
 </style>

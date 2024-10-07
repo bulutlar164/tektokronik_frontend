@@ -9,9 +9,19 @@
         <p class="description">Resimlerinizi seçin ve analiz sonuçlarını öğrenin.</p>
 
         <div class="upload-section">
-          <input type="file" @change="onFileChange" multiple accept=".jpg,.jpeg,.png" class="file-input" />
+          <input
+            type="file"
+            @change="onFileChange"
+            multiple
+            accept=".jpg,.jpeg,.png"
+            class="file-input"
+            id="file-upload"
+          />
+          <label for="file-upload" class="custom-file-upload">
+            <span>Dosya Seç</span>
+          </label>
           <button v-if="!isUploading" @click="uploadImages" class="upload-btn">Resimleri Yükle</button>
-          <p v-if="isUploading">Yükleniyor...</p> <!-- Yükleme durumu gösterimi -->
+          <p v-if="isUploading">Yükleniyor...</p>
         </div>
 
         <div class="image-preview">
@@ -36,18 +46,31 @@
       <div class="right-side">
         <h2>Analiz Sonuçları</h2>
         <div class="result-box">
-          <div class="result-content">
-            <p
-              v-if="analysisResults.length"
-              v-for="(result, index) in analysisResults"
-              :key="index"
-              @click="highlightAnalysis(index)"
-              :class="{ highlighted: highlightedIndex === index }"
-            >
-              {{ result }}
-            </p>
-            <p v-else>Analiz bekleniyor...</p>
-          </div>
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Hasar Durumu</th>
+                <th>İnsan Sayısı</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-if="analysisResults.length"
+                v-for="(result, index) in analysisResults"
+                :key="index"
+                @click="highlightAnalysis(index)"
+                :class="{ highlighted: highlightedIndex === index }"
+              >
+                <td>{{ index + 1 }}</td>
+                <td>{{ result.severity }}</td>
+                <td>{{ result.peopleCount }}</td>
+              </tr>
+              <tr v-else>
+                <td colspan="3">Analiz bekleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -91,7 +114,7 @@ export default {
         const responseData = await res.json();
 
         // Gelen JSON'u analiz sonuçlarına uygun şekilde dönüştür
-        this.analysisResults = responseData.results.map((result, index) => {
+        this.analysisResults = responseData.results.map((result) => {
           let severity = "";
           if (result.predicted_class === 0) {
             severity = "Hafif Hasarlı";
@@ -100,7 +123,10 @@ export default {
           } else if (result.predicted_class === 2) {
             severity = "Ağır Hasarlı";
           }
-          return `${index + 1}- Hasar Durumu: ${severity}, İnsan Sayısı: ${result.PeopleRandom}`;
+          return {
+            severity,
+            peopleCount: result.PeopleRandom
+          };
         });
 
         alert("Resimler başarıyla yüklendi!");
@@ -137,12 +163,14 @@ export default {
 /* Ana içerik alanı */
 .content-section {
   display: flex;
+  flex-direction: row; /* İlk başta yan yana yerleştir */
+  justify-content: space-between; /* Boşlukları eşit dağıt */
   height: calc(100vh - 60px); /* Navbar'ı hesaba kat */
 }
 
 /* Sol taraf: Resim yükleme alanı */
 .left-side {
-  width: 50%;
+  width: 48%; /* Genişlik sınırı */
   background-color: #f4f4f4;
   padding: 30px;
   display: flex;
@@ -162,18 +190,34 @@ export default {
 .description {
   color: #666;
   margin-bottom: 20px;
+  text-align: center; /* Yazıyı ortala */
 }
 
 .upload-section {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column; /* Dikey hizala */
+  align-items: center; /* Ortala */
   margin-bottom: 20px;
 }
 
 .file-input {
-  padding: 10px;
-  margin-right: 15px;
+  display: none; /* Varsayılan dosya girişi gizlensin */
+}
+
+.custom-file-upload {
+  margin: 10px;
+  display: inline-block;
+  padding: 12px 25px;
+  cursor: pointer;
+  background-color: #ff6f61; /* Arka plan rengi */
+  color: white; /* Yazı rengi */
+  border-radius: 8px; /* Köşe yuvarlama */
+  text-align: center; /* Yazıyı ortala */
+  transition: background-color 0.3s ease; /* Geçiş efekti */
+}
+
+.custom-file-upload:hover {
+  background-color: #ff3d2e; /* Hover efekti */
 }
 
 .upload-btn {
@@ -240,40 +284,44 @@ export default {
 
 /* Sağ taraf: Analiz sonuçları */
 .right-side {
-  width: 50%;
+  width: 48%; /* Genişlik sınırı */
   background-color: #ded260;
   padding: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Flex-start ile üstten hizalama */
+  justify-content: flex-start; /* Üstten hizalama */
   overflow-y: auto; /* Dikey kaydırma çubuğu ekle */
-  box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.right-side h2 {
-  font-size: 2.2em;
-  color: #333;
-  margin-bottom: 20px;
 }
 
 .result-box {
-  width: 80%;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  height: 400px; /* Analiz sonuçları alanı için yükseklik ayarı */
-  overflow-y: auto; /* Dikey kaydırma çubuğu ekle */
+  width: 100%;
+  overflow-x: auto; /* Yatay kaydırma çubuğu ekle */
 }
 
-.result-content {
-  max-height: 100%; /* İçerik yüksekliği tam alanı kapsasın */
+.result-table {
+  width: 100%;
+  border-collapse: collapse; /* Kenarları birleştir */
+  text-align: left; /* Yazı sola yasla */
 }
 
-.result-content p {
-  margin: 10px 0;
-  line-height: 1.5; /* Satır yüksekliği arttırılarak daha rahat okunabilirlik sağlandı */
+.result-table th,
+.result-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.result-table th {
+  background-color: #f2f2f2;
+}
+
+.result-table tr:hover {
+  background-color: #f5f5f5; /* Üzerine gelindiğinde arka plan rengi değişimi */
+}
+
+/* Vurgulama */
+.highlighted {
+  background-color: rgb(58, 173, 40);
+  animation: highlight 0.5s ease-in-out;
 }
 </style>
