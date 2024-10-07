@@ -1,4 +1,3 @@
-
 <template>
   <div id="map" class="map-container"></div>
 </template>
@@ -8,9 +7,14 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';  // Veri çekmek için axios kullanılıyor
 import eventBus from '@/eventBus'; // EventBus'ı import ediyoruz
+import LocationPopupComponent from '@/components/AdminComponent/LocationPopupComponent.vue';
+import { createApp, h } from 'vue';
 
 export default {
   name: "MapComponent",
+  components: {
+    LocationPopupComponent
+  },
   data() {
     return {
       map: null, // Harita referansı
@@ -96,26 +100,40 @@ export default {
           L.marker(data.coords, {icon: newLabel}).addTo(this.map);
         }
 
-        circleMarker.bindPopup(`
-          <b>${data.info}</b><br>
-          Adres: ${data.info}<br>
-          Yükseklik: ${Math.floor(Math.random() * 50) + 10}m<br>
-          Durum: ${Math.random() > 0.5 ? 'Riskli' : 'Güvenli'}<br>
-          <img src="${this.getRandomBuildingImage()}" alt="Bina Resmi" style="width:150px;height:150px;"/>
-        `);
+        // Vue bileşenini pop-up içeriği olarak oluşturuyoruz
+        const popupContainer = document.createElement('div');
+        createApp({
+          render: () => h(LocationPopupComponent, {
+            address: data.info,
+            damageStatus: data.isNew ? 'Riskli' : 'Güvenli',
+            estimatedPopulation: Math.floor(Math.random() * 100) + 20,
+            equipmentAvailability: Math.random() > 0.5 ? 'Var' : 'Yok',
+            gatheringPoint: Math.random() > 0.5 ? 'Belirtilmiş Alan' : 'Yönlendirilmedi',
+            buildingImage: this.getRandomBuildingImage(),
+            team: Math.random() > 0.5 ? 'Ekip A' : 'Ekip Bilgisi Yok'
+          })
+        }).mount(popupContainer);
+
+        circleMarker.bindPopup(popupContainer, {
+          minWidth: 600,
+          backgroundColor: 'beige',
+        });
 
         // Marker'a tıklandığında animasyonlu yakınlaştırma
         circleMarker.on('click', () => {
           const currentZoom = this.map.getZoom();
           const targetZoom = 18; // Yakınlaştırmak istediğiniz seviye
 
+          // Koordinatları hafifçe kaydırıyoruz (örneğin 0.001 ile)
+          const adjustedCoords = [data.coords[0] + 0.0013, data.coords[1]];
+
           if (currentZoom < targetZoom) {
-            this.map.flyTo(data.coords, targetZoom, {
+            this.map.flyTo(adjustedCoords, targetZoom, {
               animate: true,
-              duration: 1.5 // Animasyonun süresi (saniye cinsinden)
+              duration: 0.7// Animasyonun süresi (saniye cinsinden)
             });
           } else {
-            this.map.flyTo(data.coords, currentZoom, {
+            this.map.flyTo(adjustedCoords, currentZoom, {
               animate: true,
               duration: 1.0
             });

@@ -13,6 +13,9 @@ import User from './views/User.vue';
 import StatisticsPage from './views/StatisticsPage.vue';
 import AIPage from './views/AIPage.vue';
 //Sevket
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'leaflet/dist/leaflet.css';
 
 const routes = [
     {path:"/",component:Login},

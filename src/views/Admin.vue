@@ -19,9 +19,9 @@
 
     <!-- Information Boxes with Functional Buttons -->
     <div class="boxes row mt-4">
-      <CrowdDetectionsBox class="col-12 col-md-4" />
-      <ResourcesBox class="col-12 col-md-4" />
-      <DamageReportsBox class="col-12 col-md-4" />
+      <ResourcesBox />
+      <EquipmentBox />
+      <DamageReportsBox />
     </div>
   </div>
 </template>
