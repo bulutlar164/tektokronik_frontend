@@ -1,20 +1,20 @@
 <template>
-  <div class="card mb-3" style="max-width: 800px;">
+  <div v-if="report" class="card mb-3" style="max-width: 800px;">
     <div class="d-flex flex-row">
-      <!-- Image Section -->
+      <!-- Görüntü Bölümü -->
       <div class="col-md-6 p-2">
         <img
-            v-if="buildingImage"
-            :src="buildingImage"
+            v-if="report.image && report.image.filePath"
+            :src="report.image.filePath"
             alt="Building Image"
             class="card-img"
             style="width: 100%; height: 100%; object-fit: cover; border-radius: 15px;">
       </div>
 
-      <!-- Details Section -->
+      <!-- Detaylar Bölümü -->
       <div class="col-md-6 p-4 d-flex flex-column justify-content-between bordered-section">
         <div class="card-header text-white text-center custom-header">
-          <h5 class="card-title mb-0 text-white">{{ address }}</h5>
+          <h5 class="card-title mb-0 text-white">{{ report.location.address }}</h5>
         </div>
 
         <div class="info-grid">
@@ -23,14 +23,14 @@
               <i class="fas fa-exclamation-circle info-icon"></i>
               <span class="info-label">Hasar Durumu:</span>
             </div>
-            <span class="info-value">{{ damageStatus }}</span>
+            <span class="info-value">{{ report.buildingStatus }}</span>
           </div>
           <div class="info-item">
             <div class="info-label-container">
               <i class="fas fa-users info-icon"></i>
               <span class="info-label">Muhtemel Nüfus:</span>
             </div>
-            <span class="info-value">{{ estimatedPopulation }}</span>
+            <span class="info-value">{{ report.estimatedPeople }}</span>
           </div>
           <div class="info-item">
             <div class="info-label-container">
@@ -51,92 +51,281 @@
               <i class="fas fa-user-shield info-icon"></i>
               <span class="info-label">Buradaki Ekipler:</span>
             </div>
-            <span class="info-value">{{ team }}</span>
+            <span class="info-value">{{ report.team.teamName }}</span>
           </div>
         </div>
-        <button @click="$emit('coordinate')" class="btn btn-outline-success mt-4 w-100 align-self-end">
+        <button @click="openSweetAlertModal" class="btn btn-outline-success mt-4 w-100 align-self-end">
           Koordinasyonu Sağla
         </button>
       </div>
     </div>
+  </div>
 
-    <!-- Modal -->
-    <div v-if="showModal" class="modal-backdrop">
-      <div class="modal-content">
-        <h3>Koordinasyon Seçimleri</h3>
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-            <label for="teamSelection">Takımlar</label>
-            <select id="teamSelection" v-model="selectedTeam" class="form-control">
-              <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="foodSelection">Gıdalar</label>
-            <select id="foodSelection" v-model="selectedFood" class="form-control">
-              <option v-for="food in foods" :key="food.id" :value="food.id">{{ food.name }}</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-success">Kaydet</button>
-          <button type="button" class="btn btn-secondary" @click="closeModal">İptal</button>
-        </form>
-      </div>
+  <!-- Yükleniyor Göstergesi -->
+  <div v-else class="text-center mt-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Yükleniyor...</span>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 export default {
   name: "LocationPopupComponent",
-  props: {
-    address: String,
-    damageStatus: String,
-    estimatedPopulation: Number,
-    equipmentAvailability: String,
-    gatheringPoint: String,
-    buildingImage: String,
-    team: String
-  },
   data() {
     return {
-      showModal: false,
+      report: null,
       teams: [],
-      foods: [],
-      selectedTeam: null,
-      selectedFood: null,
+      resources: [], // Eklenen kaynakları yönetmek için yeni durum
+      equipmentAvailability: "Bilinmiyor", // Varsayılan değer
+      gatheringPoint: "Bilinmiyor", // Varsayılan değer
     };
   },
   methods: {
-    openModal() {
-      this.showModal = true;
-      this.fetchData();
-    },
-    closeModal() {
-      this.showModal = false;
-    },
-    fetchData() {
-      // Fetch teams and foods from the API when the modal opens
-      fetch('/api/teams')
-          .then(response => response.json())
-          .then(data => {
-            this.teams = data;
-          });
+    openSweetAlertModal() {
+      this.fetchTeamsAndFoods().then(() => {
+        Swal.fire({
+          title: 'Koordinasyon Seçimleri',
+          html: this.generateModalContent(),
+          width: '1000px', // Genişlik 900px olarak artırıldı
+          showCancelButton: true,
+          confirmButtonText: 'Kaydet',
+          cancelButtonText: 'İptal',
+          focusConfirm: false,
+          customClass: {
+            popup: 'swal2-custom-modal',
+          },
+          didOpen: () => {
+            // Ekle butonları için olay dinleyicileri başlatılıyor
+            document.getElementById('addResourceButton').addEventListener('click', this.addResource);
+            document.getElementById('addEquipmentButton').addEventListener('click', this.addEquipment);
 
-      fetch('/api/foods')
-          .then(response => response.json())
+            // Kullanıcıya rehberlik etmek için varsayılan bir kaynak ve ekipman ekleniyor
+            this.addResource();
+            this.addEquipment();
+          },
+          preConfirm: () => {
+            // Form doğrulaması
+            const selectedTeam = Swal.getPopup().querySelector('#teamSelection').value;
+            if (!selectedTeam) {
+              Swal.showValidationMessage('Lütfen bir takım seçin');
+              return false;
+            }
+
+            // Ekipmanları toplama
+            const equipments = [];
+            Swal.getPopup().querySelectorAll('.equipment-item').forEach(element => {
+              const equipmentType = element.querySelector('.equipment-type').value;
+              const equipmentAmount = element.querySelector('.equipment-amount').value;
+              if (equipmentType && equipmentAmount) {
+                equipments.push({ type: equipmentType, amount: Number(equipmentAmount) });
+              }
+            });
+
+            // Kaynakları toplama
+            const resources = [];
+            Swal.getPopup().querySelectorAll('.resource-item').forEach(element => {
+              const resourceType = element.querySelector('.resource-type').value;
+              const resourceAmount = element.querySelector('.resource-amount').value;
+              if (resourceType && resourceAmount) {
+                resources.push({ type: resourceType, amount: Number(resourceAmount) });
+              }
+            });
+
+            return {
+              selectedTeam,
+              equipments,
+              resources,
+            };
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const postData = {
+              reportId: this.report.reportId,
+              teamId: result.value.selectedTeam,
+              equipments: result.value.equipments,
+              resources: result.value.resources,
+            };
+            this.handleSaveCoordination(postData);
+          }
+        });
+      });
+    },
+
+    // Yeni bir kaynak ekleme fonksiyonu
+    addResource() {
+      const container = document.getElementById('resourcesContainer');
+
+      // Yeni bir kaynak satırı oluşturuluyor
+      const newResource = document.createElement('div');
+      newResource.className = 'row align-items-end mb-3 resource-item';
+
+      newResource.innerHTML = `
+        <div class="col-md-5">
+          <label class="form-label">Kaynak Türü</label>
+          <select class="form-select resource-type" required>
+            <option disabled selected value="">Bir kaynak seçin</option>
+            <option value="Gıda">Gıda</option>
+            <option value="Battaniye">Battaniye</option>
+            <option value="İsıtıcı">İsıtıcı</option>
+            <option value="İlaç">İlaç</option>
+            <option value="Su">Su</option>
+            <option value="Çadır">Çadır</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Adet</label>
+          <input type="number" class="form-control resource-amount" placeholder="Adet girin" min="1" required />
+        </div>
+        <div class="col-md-3 text-end">
+          <button type="button" class="btn btn-danger remove-resource-btn">Sil</button>
+        </div>
+      `;
+
+      // Yeni kaynağı konteynıra ekle
+      container.appendChild(newResource);
+
+      // Sil butonuna olay dinleyicisi ekle
+      newResource.querySelector('.remove-resource-btn').addEventListener('click', () => {
+        container.removeChild(newResource);
+      });
+    },
+
+    // Yeni bir ekipman ekleme fonksiyonu
+    addEquipment() {
+      const container = document.getElementById('equipmentsContainer');
+
+      // Yeni bir ekipman satırı oluşturuluyor
+      const newEquipment = document.createElement('div');
+      newEquipment.className = 'row align-items-end mb-3 equipment-item';
+
+      newEquipment.innerHTML = `
+        <div class="col-md-5">
+          <label class="form-label">Ekipman Türü</label>
+          <select class="form-select equipment-type" required>
+            <option disabled selected value="">Bir ekipman seçin</option>
+            <option value="Ağır Makine (Kepçe)">Ağır Makine (Kepçe)</option>
+            <option value="İtfaiye">İtfaiye</option>
+            <option value="Ambulans (Sağlık Ekip)">Ambulans (Sağlık Ekip)</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Adet</label>
+          <input type="number" class="form-control equipment-amount" placeholder="Adet girin" min="1" required />
+        </div>
+        <div class="col-md-3 text-end">
+          <button type="button" class="btn btn-danger remove-equipment-btn">Sil</button>
+        </div>
+      `;
+
+      // Yeni ekipmanı konteynıra ekle
+      container.appendChild(newEquipment);
+
+      // Sil butonuna olay dinleyicisi ekle
+      newEquipment.querySelector('.remove-equipment-btn').addEventListener('click', () => {
+        container.removeChild(newEquipment);
+      });
+    },
+
+    // Modal içeriğini oluşturma fonksiyonu (Bootstrap kartları ile)
+    generateModalContent() {
+      // Takımlar için seçenekler oluşturuluyor
+      const teamsOptions = this.teams
+          .map(team => `<option value="${team.teamId}">${team.teamName}</option>`)
+          .join('');
+
+      return `
+        <form id="resourceEquipmentForm">
+          <div class="container-fluid">
+            <div class="row">
+              <!-- Takımlar Kartı -->
+              <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white">
+                    Takımlar
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="teamSelection" class="form-label">Takım Seçin</label>
+                      <select id="teamSelection" class="form-select" required>
+                        <option disabled selected value="">Bir takım seçin</option>
+                        ${teamsOptions}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ekipmanlar Kartı -->
+              <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white">
+                    Ekipmanlar
+                  </div>
+                  <div class="card-body">
+                    <div id="equipmentsContainer">
+                      <!-- Dinamik olarak eklenen ekipmanlar burada görünecek -->
+                    </div>
+                    <button type="button" id="addEquipmentButton" class="btn btn-outline-success mt-2 w-100">Ekipman Ekle</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Kaynaklar Kartı -->
+              <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white">
+                    Kaynaklar
+                  </div>
+                  <div class="card-body">
+                    <div id="resourcesContainer">
+                      <!-- Dinamik olarak eklenen kaynaklar burada görünecek -->
+                    </div>
+                    <button type="button" id="addResourceButton" class="btn btn-outline-success mt-2 w-100">Kaynak Ekle</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      `;
+    },
+
+    // Rapor verisini çekme fonksiyonu
+    fetchReport() {
+      fetch('http://localhost:8080/reports/1') // Uygun reportId ile değiştirin
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Rapor verisi alınamadı');
+            }
+            return response.json();
+          })
           .then(data => {
-            this.foods = data;
+            this.report = data;
+            this.mapAdditionalFields();
+          })
+          .catch(error => {
+            console.error('Hata:', error);
           });
     },
-    submitForm() {
-      // Send the selected data to the backend
-      const postData = {
-        teamId: this.selectedTeam,
-        foodId: this.selectedFood,
-      };
 
+    // Takımları ve yiyecekleri çekme fonksiyonu
+    fetchTeamsAndFoods() {
+      return fetch('/api/teams')
+          .then(res => res.json())
+          .then(teamsData => {
+            this.teams = teamsData;
+          })
+          .catch(error => {
+            console.error('Takımlar çekilirken hata:', error);
+          });
+    },
+
+    // Koordinasyonu kaydetme fonksiyonu
+    handleSaveCoordination(postData) {
       fetch('/api/save-coordination', {
         method: 'POST',
         headers: {
@@ -144,39 +333,39 @@ export default {
         },
         body: JSON.stringify(postData),
       })
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Koordinasyon verisi kaydedilemedi');
+            }
+            return response.json();
+          })
           .then(data => {
-            console.log('Data saved:', data);
-            this.closeModal();
+            console.log('Veri kaydedildi:', data);
+            Swal.fire('Başarılı', 'Koordinasyon başarıyla kaydedildi.', 'success');
           })
           .catch(error => {
-            console.error('Error saving data:', error);
+            console.error('Hata:', error);
+            Swal.fire('Hata', 'Koordinasyon kaydedilirken bir hata oluştu.', 'error');
           });
+    },
+
+    // Ek alanları haritalama fonksiyonu
+    mapAdditionalFields() {
+      this.equipmentAvailability = this.report.reportEquipments && this.report.reportEquipments.length > 0
+          ? this.report.reportEquipments.map(eq => eq.equipmentName).join(', ')
+          : 'Ekipman yok';
+
+      this.gatheringPoint = this.report.gatheringPoint || 'Belirtilmemiş';
     }
+  },
+  mounted() {
+    this.fetchReport();
   }
 };
 </script>
 
 <style scoped>
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 500px;
-}
-
+/* Kart ve içerik düzeni için stiller */
 .form-group {
   margin-bottom: 20px;
 }
@@ -185,14 +374,14 @@ export default {
   margin-left: 10px;
 }
 
-/* Gradient Header */
+/* Gradient Başlık */
 .custom-header {
   background: #2F56C8;
   border-radius: 15px 15px 0 0;
   padding: 15px;
 }
 
-/* Info Grid Styling */
+/* Bilgi Grid Stili */
 .info-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -200,7 +389,7 @@ export default {
   margin-top: 10px;
 }
 
-/* Info Item Styling */
+/* Bilgi Öğesi Stili */
 .info-item {
   display: flex;
   justify-content: space-between;
@@ -241,7 +430,7 @@ export default {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Button Styling */
+/* Buton Stilleri */
 .btn-outline-success {
   border-color: #38ada9;
   color: #38ada9;
@@ -263,4 +452,34 @@ export default {
   letter-spacing: 1px;
 }
 
+/* Yükleniyor Göstergesi Stili */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* SweetAlert2 Özel Stilleri */
+.swal2-custom-modal {
+  padding: 20px !important;
+}
+
+.swal2-custom-modal .card-header {
+  font-size: 16px;
+  text-align: center;
+}
+
+.swal2-custom-modal .card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.swal2-custom-modal .btn {
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .swal2-custom-modal {
+    width: 100% !important;
+  }
+}
 </style>

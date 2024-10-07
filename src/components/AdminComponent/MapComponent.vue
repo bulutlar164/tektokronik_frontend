@@ -51,13 +51,12 @@ export default {
     },
     getLocationColor(locationType) {
       const colorMap = {
-        hasar: 'red',
-        insan_yogunlugu: 'yellow',
-        toplanma_alani: 'green',
+        genel: 'orange',
+        insan_yogunlugu: 'green',
+        toplanma_alani: 'yellow',
         kaynak: 'blue',
-        genel: 'purple'
       };
-      return colorMap[locationType] || 'orange'; // Tanımlanmayan tipler için varsayılan renk
+      return colorMap[locationType] || 'red'; // Tanımlanmayan tipler için varsayılan renk
     },
     initMap() {
       // Haritayı başlatıyoruz
