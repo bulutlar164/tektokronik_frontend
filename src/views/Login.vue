@@ -17,8 +17,8 @@
     <!-- Right side login/register form -->
     <div class="form-container">
       <div class="form-toggle">
-        <button :class="{ active: isLogin }" @click="toggleForm('login')">Login</button>
-        <button :class="{ active: !isLogin }" @click="toggleForm('register')">Register</button>
+        <button :class="{ active: isLogin }" @click="toggleForm('login')" class="form-toggle-button">Login</button>
+        <button :class="{ active: !isLogin }" @click="toggleForm('register')" class="form-toggle-button">Register</button>
       </div>
 
       <!-- Login form -->
@@ -134,6 +134,7 @@ export default {
 /* Container for the entire page */
 .login-container {
   display: flex;
+  flex-direction: row;
   height: 100vh;
   background-color: #000;
   position: relative;
@@ -167,21 +168,22 @@ export default {
   margin-bottom: 20px;
 }
 
-.form-toggle button {
+.form-toggle-button {
   padding: 10px 20px;
   background-color: transparent;
   border: 2px solid #fff;
   color: #fff;
   cursor: pointer;
   font-size: 18px;
+  flex: 1; /* Ensure buttons take equal space */
   transition: 0.3s;
 }
 
-.form-toggle button.active {
+.form-toggle-button.active {
   background-color: #4CAF50;
 }
 
-.form-toggle button:hover {
+.form-toggle-button:hover {
   background-color: #45a049;
 }
 
@@ -227,9 +229,94 @@ input::placeholder {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 100%; /* Make the button take full width */
 }
 
 .login-button:hover {
   background-color: #45a049;
+}
+
+/* Responsive Styling */
+
+/* For screens 768px and smaller (tablets) */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .background-image {
+    height: 50vh;
+    width: 100%;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 0; /* Remove margin top */
+    align-items: stretch; /* Stretch the form container */
+  }
+
+  .navbar {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .brand-name {
+    font-size: 18px;
+  }
+
+  .navbar-right .nav-link {
+    margin-left: 10px;
+    font-size: 14px;
+  }
+
+  .form-toggle {
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 10px; /* Add gap between buttons */
+  }
+
+  .form-toggle-button {
+    width: 100%; /* Ensure buttons take full width */
+  }
+}
+
+/* For screens 480px and smaller (mobile) */
+@media (max-width: 480px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .background-image {
+    height: 40vh;
+    width: 100%;
+  }
+
+  .form-toggle {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-toggle-button {
+    width: 100%; /* Ensure buttons take full width */
+    font-size: 16px;
+  }
+
+  .form-container {
+    padding: 1rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    font-size: 14px;
+  }
+
+  .login-button {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
 }
 </style>

@@ -16,7 +16,7 @@
             <p>Yüzde: {{ stat.percentage }}%</p>
           </div>
           <div class="chart-container">
-            <canvas :id="'pieChart' + index" width="100" height="100"></canvas>
+            <canvas :id="'pieChart' + index"></canvas>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
             <p>Toplam: {{ bar.total }}</p>
           </div>
           <div class="chart-container bar-chart-container">
-            <canvas :id="'barChart' + index" width="300" height="200"></canvas> <!-- Daha geniş ve yüksek -->
+            <canvas :id="'barChart' + index"></canvas>
           </div>
         </div>
       </div>
@@ -133,7 +133,6 @@ export default {
 .statistics-page {
   background-color: #faf8f9; /* Muted beige background color */
   min-height: 100vh;
-  padding: 20px;
 }
 
 .page-title {
@@ -144,7 +143,7 @@ export default {
 .statistics-section {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: center; /* Center elements in the section */
 }
 
 .statistic-container {
@@ -155,23 +154,36 @@ export default {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  width: 30%; /* Adjust width to fit 3 columns */
+  width: 300px; /* Set a max-width for better responsiveness */
+  max-width: 100%; /* Ensure the container doesn't exceed its parent width */
   background-color: #fff;
+  flex: 1 1 300px; /* Allow flexibility in size for smaller screens */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
 }
 
 .chart-container {
-  width: 100px; /* Fixed width for pie charts */
-  height: 100px; /* Fixed height for pie charts */
+  width: 100%; /* Full width for the chart container */
+  height: 200px; /* Fixed height for charts */
   margin-top: 10px;
 }
 
 .bar-chart-container {
-  width: 300px; /* Daha geniş alan */
-  height: 200px; /* Daha fazla yükseklik */
+  height: 200px; /* Maintain height for bar charts */
   margin-top: 10px;
 }
 
 .statistic-info {
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .statistic-container {
+    width: 90%; /* Stack containers on smaller screens */
+    max-width: 100%; /* Ensure full width on small screens */
+  }
+
+  .chart-container {
+    height: 150px; /* Adjust chart height for mobile */
+  }
 }
 </style>
