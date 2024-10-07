@@ -19,8 +19,8 @@
 
     <!-- Information Boxes with Functional Buttons -->
     <div class="boxes row mt-4">
-      <CrowdDetectionsBox />
       <ResourcesBox />
+      <EquipmentBox />
       <DamageReportsBox />
     </div>
   </div>

@@ -40,7 +40,7 @@
                   class="btn btn-outline-primary btn-block"
                   @click="showTeamLocation(team)"
               >
-                Haritada Gör
+                Konumu Görüntüle
               </button>
               <button
                   class="btn btn-outline-success btn-block mt-2"
