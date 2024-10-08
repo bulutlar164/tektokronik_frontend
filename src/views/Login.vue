@@ -31,7 +31,7 @@
           <div class="form-group">
             <input type="password" v-model="password" placeholder="Password" required />
           </div>
-          <button type="submit" class="login-button">Log In</button>
+          <button type="submit" class="login-button" @click="Login">Log In</button>
         </form>
       </div>
 
@@ -59,7 +59,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
+  name:'Login',
   data() {
     return {
       isLogin: true,
@@ -68,8 +70,13 @@ export default {
       newUsername: '',
       email: '',
       newPassword: '',
-      passwordAgain: ''
+      passwordAgain: '',
+      users_information : []
     };
+  },
+  mounted(){
+    this.GetAllUser(),
+    this.ShowData()
   },
   methods: {
     toggleForm(formType) {
@@ -84,9 +91,65 @@ export default {
       } else {
         alert('Passwords do not match!');
       }
-    }
+    },
+    async GetAllUser() {
+  try {
+    const response = await axios.get('http://localhost:8080/users');
+    this.users_information = response.data.map((user) => ({
+      id: user.userId,
+      username: user.username,
+      password: user.passwordHash,
+      email: user.email,
+      role: user.role,
+      team: {
+        teamId: user.team.teamId,
+        teamName: user.team.teamName,
+        contactDetails: user.team.contactDetails,
+        assignedRegion: user.team.assignedRegion,
+        capacity: user.team.capacity,
+        status: user.team.status,
+        currentLocation: {
+          locationId: user.team.currentLocation.locationId,
+          latitude: user.team.currentLocation.latitude,
+          longitude: user.team.currentLocation.longitude,
+          address: user.team.currentLocation.address,
+          region: user.team.currentLocation.region,
+          locationType: user.team.currentLocation.locationType
+        },
+        users: user.team.users.map((teamUser) => ({
+          userId: teamUser.userId,
+          username: teamUser.username,
+          passwordHash: teamUser.passwordHash,
+          email: teamUser.email,
+          role: teamUser.role
+        }))
+      }
+      
+    }));
+    this.ShowData()
+  } catch (error) {
+    console.error('Kullanıcılar yüklenirken bir hata oluştu:', error);
   }
-};
+},
+    ShowData(){
+      console.log(this.users_information)
+    },
+    Login(){
+    
+    const enteredUsername = this.username;
+    const enteredPassword = this.password;
+    const matchedUser = this.users_information.find(user => 
+    user.username === enteredUsername && user.password === enteredPassword); 
+
+    this.AccesRouter(matchedUser)
+    },
+    AccesRouter(matchedUser){
+      this.$router.push(matchedUser.role === "yönetici" ? "Admin" : "User");
+      console.log(matchedUser.Role);
+      //console.log("?");
+    }
+    } 
+  };
 </script>
 
 <style scoped>
