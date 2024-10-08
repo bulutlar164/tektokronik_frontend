@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     fetchReports() {
-      // Fetch damage reports and crowd detection data from the backend
+      // Fetch damage reports and crowd detection data from the tektokronik-backend
     }
   }
 };

@@ -14,7 +14,7 @@
       <!-- Detaylar Bölümü -->
       <div class="col-md-6 p-4 d-flex flex-column justify-content-between bordered-section">
         <div class="card-header text-white text-center custom-header">
-          <h5 class="card-title mb-0 text-white">{{ report.location.address }}</h5>
+          <h5 class="card-title mb-0 text-white">{{ report.location?.address || 'Adres Bilgisi Yok' }}</h5>
         </div>
 
         <div class="info-grid">
@@ -72,6 +72,7 @@
 <script>
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import axios from 'axios'; // Axios'u içe aktarın
 
 export default {
   name: "LocationPopupComponent",
@@ -92,12 +93,13 @@ export default {
     };
   },
   methods: {
-    openSweetAlertModal() {
-      this.fetchTeamsAndFoods().then(() => {
+    async openSweetAlertModal() {
+      try {
+        await this.fetchTeamsAndFoods();
         Swal.fire({
           title: 'Koordinasyon Seçimleri',
           html: this.generateModalContent(),
-          width: '1000px', // Genişlik 900px olarak artırıldı
+          width: '1000px', // Genişlik 1000px olarak ayarlandı
           showCancelButton: true,
           confirmButtonText: 'Kaydet',
           cancelButtonText: 'İptal',
@@ -168,7 +170,10 @@ export default {
             this.handleSaveCoordination(postData);
           }
         });
-      });
+      } catch (error) {
+        console.error('Modal açılırken hata:', error);
+        Swal.fire('Hata', 'Koordinasyon modalı açılırken bir hata oluştu.', 'error');
+      }
     },
 
     // Yeni bir kaynak ekleme fonksiyonu
@@ -336,66 +341,58 @@ export default {
     },
 
     // Rapor verisini çekme fonksiyonu
-    fetchReport() {
-      fetch('http://localhost:8080/reports/1') // Uygun reportId ile değiştirin
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Rapor verisi alınamadı');
-            }
-            return response.json();
-          })
-          .then(data => {
-            this.report = data;
-            this.mapAdditionalFields();
-          })
-          .catch(error => {
-            console.error('Hata:', error);
-          });
+    async fetchReport() {
+      try {
+        const reportId = 1; // Dinamik yapmak isterseniz, prop veya route parametresi kullanabilirsiniz
+        const response = await axios.get(`http://localhost:8080/reports/${reportId}`);
+        console.log("Report Response:", response);
+        this.report = response.data;
+        this.mapAdditionalFields();
+      } catch (error) {
+        console.error('Rapor verisi alınırken hata:', error);
+        Swal.fire('Hata', 'Rapor verisi alınırken bir hata oluştu.', 'error');
+      }
     },
 
     // Takımları ve yiyecekleri çekme fonksiyonu
-    fetchTeamsAndFoods() {
-      return fetch('/api/teams')
-          .then(res => res.json())
-          .then(teamsData => {
-            this.teams = teamsData;
-          })
-          .catch(error => {
-            console.error('Takımlar çekilirken hata:', error);
-          });
+    async fetchTeamsAndFoods() {
+      try {
+        const response = await axios.get('http://localhost:8080/api/teams');
+        this.teams = response.data;
+      } catch (error) {
+        console.error('Takımlar çekilirken hata:', error);
+        Swal.fire('Hata', 'Takımlar çekilirken bir hata oluştu.', 'error');
+      }
     },
 
     // Koordinasyonu kaydetme fonksiyonu
-    handleSaveCoordination(postData) {
-      fetch('/api/save-coordination', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(postData),
-      })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Koordinasyon verisi kaydedilemedi');
-            }
-            return response.json();
-          })
-          .then(data => {
-            console.log('Veri kaydedildi:', data);
-            Swal.fire('Başarılı', 'Koordinasyon başarıyla kaydedildi.', 'success');
-          })
-          .catch(error => {
-            console.error('Hata:', error);
-            Swal.fire('Hata', 'Koordinasyon kaydedilirken bir hata oluştu.', 'error');
-          });
+    async handleSaveCoordination(postData) {
+      try {
+        const response = await axios.post('http://localhost:8080/api/save-coordination', postData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('Veri kaydedildi:', response.data);
+        Swal.fire('Başarılı', 'Koordinasyon başarıyla kaydedildi.', 'success');
+      } catch (error) {
+        console.error('Koordinasyon kaydedilirken hata:', error);
+        Swal.fire('Hata', 'Koordinasyon kaydedilirken bir hata oluştu.', 'error');
+      }
     },
 
     // Ek alanları haritalama fonksiyonu
     mapAdditionalFields() {
-      this.equipmentAvailability = this.report.reportEquipments && this.report.reportEquipments.length > 0
-          ? this.report.reportEquipments.map(eq => eq.equipmentName).join(', ')
-          : 'Ekipman yok';
+      // Ekipman ve Gıda Durumu
+      if (this.report.reportEquipments && this.report.reportEquipments.length > 0) {
+        this.equipmentAvailability = this.report.reportEquipments
+            .map(eq => eq.equipmentName) // equipmentName alanını yanıt yapınıza göre ayarlayın
+            .join(', ');
+      } else {
+        this.equipmentAvailability = 'Ekipman yok';
+      }
 
+      // Toplanma Alanı
       this.gatheringPoint = this.report.gatheringPoint || 'Belirtilmemiş';
     }
   },

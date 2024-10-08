@@ -40,10 +40,14 @@ export default {
         const response = await axios.get('http://localhost:8080/api/locations'); // API endpoint'i düzenleyin
         this.markersData = response.data.map(location => ({
           coords: [location.latitude, location.longitude],
-          info: location.address || 'Adres Bilgisi Yok',
-          color: this.getLocationColor(location.locationType), // locationType'a göre renk belirleme
-          isNew: Math.random() > 0.5 // Örnek amaçlı, gerçek bir alana göre ayarlayın
+          info: location.address ? location.address : 'Adres Bilgisi Yok', // Check for address property
+          color: this.getLocationColor(location.locationType),
+          isNew: Math.random() > 0.5
         }));
+        if (!location || !location.address) {
+          console.warn('Location data is incomplete:', location); // Adres eksikse uyarı mesajı
+        }
+
         this.initMap();
       } catch (error) {
         console.error('Lokasyon verileri çekilirken hata oluştu:', error);
@@ -101,7 +105,8 @@ export default {
 
         // Vue bileşenini pop-up içeriği olarak oluşturuyoruz
         const popupContainer = document.createElement('div');
-        createApp({
+
+        const app = createApp({
           render: () => h(LocationPopupComponent, {
             address: data.info,
             damageStatus: data.isNew ? 'Riskli' : 'Güvenli',
@@ -111,11 +116,15 @@ export default {
             buildingImage: this.getRandomBuildingImage(),
             team: Math.random() > 0.5 ? 'Ekip A' : 'Ekip Bilgisi Yok'
           })
-        }).mount(popupContainer);
+        });
 
+        // Pop-up bileşenini DOM'a monte et
+        app.mount(popupContainer);
+
+        // Leaflet pop-up'ını ekliyoruz
         circleMarker.bindPopup(popupContainer, {
-          minWidth: 600,
-          backgroundColor: 'beige',
+          minWidth: 600, // Pop-up genişliği
+          closeButton: true, // Kapatma butonu
         });
 
         // Marker'a tıklandığında animasyonlu yakınlaştırma
@@ -123,13 +132,13 @@ export default {
           const currentZoom = this.map.getZoom();
           const targetZoom = 18; // Yakınlaştırmak istediğiniz seviye
 
-          // Koordinatları hafifçe kaydırıyoruz (örneğin 0.001 ile)
+          // Koordinatları hafifçe kaydırıyoruz (örneğin 0.0013 ile)
           const adjustedCoords = [data.coords[0] + 0.0013, data.coords[1]];
 
           if (currentZoom < targetZoom) {
             this.map.flyTo(adjustedCoords, targetZoom, {
               animate: true,
-              duration: 0.7// Animasyonun süresi (saniye cinsinden)
+              duration: 0.7 // Animasyonun süresi (saniye cinsinden)
             });
           } else {
             this.map.flyTo(adjustedCoords, currentZoom, {
